@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>FanOS Pro — Cabinet + System Twin</title>
+<style>
+  :root{
+    --bg:#0a1929;
+    --panel:#0f2334;
+    --panel2:#143047;
+    --line:#1e3a52;
+    --txt:#e8eef5;
+    --dim:#8aa0b4;
+    --blue:#2196f3;
+    --blue2:#64b5f6;
+    --navy:#0a1929;
+    --green:#43d17a;
+    --red:#ff4d4f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;}
+  #scene{position:fixed;inset:0;touch-action:none;}
+  canvas{display:block;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+  /* Header / brand */
+  #hdr{position:fixed;top:0;left:0;right:0;padding:12px 14px;display:flex;align-items:center;
+    gap:10px;z-index:5;pointer-events:none;}
+  #hdr svg{width:40px;height:40px;flex:0 0 auto;}
+  #hdr .wm{line-height:1;}
+  #hdr .wm .nm{font-size:17px;font-weight:800;letter-spacing:.2px;}
+  #hdr .wm .nm b{color:#fff;}
+  #hdr .wm .badge{background:var(--blue);color:#fff;font-size:12px;font-weight:800;
+    padding:2px 7px;border-radius:6px;margin-left:3px;}
+  #hdr .wm .tag{font-size:10px;color:var(--blue2);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+
+  #spec{position:fixed;top:13px;right:13px;z-index:5;text-align:right;pointer-events:none;}
+  #spec .cap{font-size:13px;font-weight:800;color:#fff;letter-spacing:.3px;}
+  #spec .meta{font-size:10px;color:var(--dim);letter-spacing:.4px;margin-top:2px;
+    font-family:ui-monospace,Menlo,monospace;}
+
+  /* Chips */
+  #chips{position:fixed;left:10px;right:10px;top:70px;z-index:5;display:flex;gap:7px;
+    overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  #chips::-webkit-scrollbar{display:none;}
+  .chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(15,35,52,.82);
+    backdrop-filter:blur(6px);color:var(--dim);font-size:12px;font-weight:600;
+    padding:7px 11px;border-radius:20px;white-space:nowrap;cursor:pointer;}
+  .chip.active{color:#fff;border-color:var(--blue);background:rgba(33,150,243,.18);}
+
+  /* Info sheet */
+  #info{position:fixed;left:10px;right:10px;bottom:64px;z-index:7;background:rgba(15,35,52,.97);
+    backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:14px 15px;
+    transform:translateY(150%);transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:520px;margin:0 auto;}
+  #info.show{transform:translateY(0);}
+  #info .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  #info .tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--blue2);font-weight:700;}
+  #info h2{font-size:17px;margin:3px 0 6px;}
+  #info p{font-size:13.5px;line-height:1.5;color:var(--dim);margin:0;}
+  #info .close{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--dim);font-size:16px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+
+  /* Controls */
+  #controls{position:fixed;left:0;right:0;bottom:0;z-index:9;
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+    background:linear-gradient(0deg,rgba(10,25,41,.94),rgba(10,25,41,0));}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+    font-size:13px;font-weight:600;padding:11px 14px;border-radius:11px;display:flex;align-items:center;
+    gap:7px;cursor:pointer;user-select:none;transition:transform .08s, border-color .15s, background .15s;}
+  .btn:active{transform:scale(.96);}
+  .btn.primary{border-color:var(--blue);background:linear-gradient(135deg,rgba(33,150,243,.22),rgba(33,150,243,.07));color:var(--blue2);}
+  .btn .dot{width:8px;height:8px;border-radius:50%;background:var(--dim);}
+  .btn.on .dot{background:var(--green);box-shadow:0 0 8px var(--green);}
+
+  /* Dashboard sheet */
+  #dash{position:fixed;left:0;right:0;bottom:0;z-index:8;background:rgba(12,28,44,.98);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);border-radius:18px 18px 0 0;
+    padding:14px 14px calc(82px + env(safe-area-inset-bottom));transform:translateY(115%);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:66vh;overflow-y:auto;
+    box-shadow:0 -12px 40px rgba(0,0,0,.55);max-width:560px;margin:0 auto;}
+  #dash.show{transform:translateY(0);}
+  .dhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .dtitle{font-size:15px;font-weight:800;}
+  .dsub{font-size:11px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;margin-top:2px;}
+  .dhbtns{display:flex;gap:7px;flex:0 0 auto;}
+  .pill{font-size:11px;font-weight:700;padding:8px 11px;border-radius:9px;cursor:pointer;border:1px solid var(--line);}
+  .pill.fire{color:var(--green);border-color:#1d4a36;background:rgba(67,209,122,.1);}
+  .pill.fire.alarm{color:#fff;border-color:var(--red);background:var(--red);}
+  .stopall{border:1px solid var(--red);background:rgba(255,77,79,.14);color:#ff9a9b;font-weight:800;
+    font-size:12px;letter-spacing:.4px;padding:9px 12px;border-radius:9px;cursor:pointer;}
+  .zhdr{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--blue2);
+    margin:14px 0 2px;}
+  .drow{display:flex;flex-direction:column;gap:9px;padding:11px 0;border-top:1px solid var(--line);}
+  .dleft{display:flex;align-items:center;gap:9px;}
+  .ddot{width:9px;height:9px;border-radius:50%;background:#3a4d5e;flex:0 0 auto;transition:background .15s;}
+  .ddot.on{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .ddot.flt{background:var(--red);box-shadow:0 0 8px var(--red);}
+  .dname{font-size:13px;font-weight:700;}
+  .drpm{font-size:11px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;margin-top:1px;}
+  .dctrl{display:flex;align-items:center;gap:10px;justify-content:space-between;}
+  .dctrl input[type=range]{flex:1;accent-color:var(--blue);height:22px;}
+  .dbtns{display:flex;gap:6px;flex:0 0 auto;}
+  .dbtn{border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:11px;
+    font-weight:700;padding:8px 11px;border-radius:8px;cursor:pointer;}
+  .dbtn:active{transform:scale(.95);}
+  .dbtn.warn{color:#ffd27a;border-color:#5a4a1f;}
+  .dbtn.reset{color:var(--blue2);border-color:#1d4a6b;}
+
+  #hint{position:fixed;left:0;right:0;top:52%;text-align:center;color:var(--dim);font-size:13px;
+    z-index:4;pointer-events:none;transition:opacity .5s;letter-spacing:.3px;}
+  #loader{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;align-items:center;
+    justify-content:center;flex-direction:column;gap:14px;}
+  #loader .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--blue);
+    border-radius:50%;animation:sp 1s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  #loader p{color:var(--dim);font-size:13px;}
+
+  /* Wiring layers panel */
+  #layers{position:fixed;left:10px;right:10px;bottom:64px;z-index:8;display:none;
+    background:rgba(15,35,52,.97);backdrop-filter:blur(12px);border:1px solid var(--line);
+    border-radius:14px;padding:12px;max-width:560px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+  #layers.show{display:block;}
+  #layers .lhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  #layers .ltitle{font-size:13px;font-weight:800;}
+  #layers .lall{font-size:11px;color:var(--blue2);border:1px solid var(--line);background:var(--panel2);
+    padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;}
+  #layers .lchips{display:flex;flex-wrap:wrap;gap:7px;}
+  .lchip{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--dim);font-size:12px;font-weight:600;padding:8px 11px;border-radius:20px;cursor:pointer;}
+  .lchip .sw{width:16px;height:16px;border-radius:5px;border:1px solid rgba(255,255,255,.2);background:transparent;}
+  .lchip.on{color:#fff;border-color:var(--blue);}
+  .lchip.on .sw{background:currentColor;}
+  .legttl{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--blue2);
+    margin:12px 0 6px;}
+  .legbox{display:flex;flex-direction:column;gap:0;}
+  .specrow{display:grid;grid-template-columns:16px 1.2fr 1.3fr 1fr;gap:8px;align-items:center;
+    padding:7px 0;border-top:1px solid var(--line);font-size:11.5px;}
+  .specrow .sw{width:14px;height:14px;border-radius:4px;background:currentColor;border:1px solid rgba(255,255,255,.2);}
+  .specnm{font-weight:700;color:var(--txt);}
+  .spectp{color:var(--dim);}
+  .specaw{color:var(--blue2);font-family:ui-monospace,Menlo,monospace;text-align:right;font-weight:700;}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div id="loader"><div class="spin"></div><p>Building system…</p></div>
+
+<header id="hdr">
+  <svg viewBox="0 0 64 64" fill="none">
+    <circle cx="30" cy="32" r="20" stroke="#cfe6fb" stroke-width="4"/>
+    <path d="M30 12 a20 20 0 0 1 18 28" stroke="#2196f3" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <g stroke="#cfe6fb" stroke-width="4" stroke-linecap="round">
+      <path d="M30 32 L30 18"/><path d="M30 32 L43 39"/><path d="M30 32 L17 39"/>
+    </g>
+    <circle cx="30" cy="32" r="3.4" fill="#2196f3"/>
+  </svg>
+  <div class="wm">
+    <div class="nm"><b>FanOS</b><span class="badge">Pro</span></div>
+    <div class="tag">Air Movement Control</div>
+  </div>
+</header>
+
+<div id="spec">
+  <div class="cap">16 × 20 × 8 in</div>
+  <div class="meta">≤50 devices · 2× RS-485</div>
+</div>
+
+<div id="chips"></div>
+
+<div id="info">
+  <div class="row"><span class="tag" id="iTag">Component</span>
+    <button class="close" id="iClose" aria-label="Close">×</button></div>
+  <h2 id="iName">—</h2>
+  <p id="iDesc">—</p>
+</div>
+
+<div id="dash"></div>
+<div id="layers"></div>
+
+<div id="hint">Drag to orbit · pinch to zoom · tap any part</div>
+
+<div id="controls">
+  <button class="btn primary" id="dashBtn">Dashboard</button>
+  <button class="btn" id="doorBtn">Open door</button>
+  <button class="btn" id="layersBtn"><span class="dot"></span>Layers</button>
+  <button class="btn" id="resetBtn">Reset</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Component info (plain English) ---------------- */
+var DATA = {
+  enclosure:{tag:"Enclosure", name:"White NEMA wall-mount",
+    desc:"White powder-coated, NEMA-rated wall enclosure with the FanOS Pro logo on the door. Back box + hinged door."},
+  backplate:{tag:"Sub-panel", name:"Mounting plate",
+    desc:"Everything lands on this plate. Wire it on the bench, then hang the whole assembly in the box."},
+  aaeon:{tag:"Controller", name:"AAEON UP 7000 Edge — the brain",
+    desc:"Runs FanOS Pro. TWO RS-485 ports built in (ttyS0 / ttyS1) drive both comms chains directly — no USB-to-serial adapters. GPIO pin 27 watches the fire-alarm dry contact."},
+  eth:{tag:"Network", name:"Ethernet switch",
+    desc:"Unmanaged switch. Ties in the Modbus TCP gear (I/O modules, sensor gateways) and the touchscreens."},
+  poe:{tag:"Network · PoE", name:"PoE switch",
+    desc:"One Cat6 to each touchscreen carries data + power. The 27\" master and the 7\" local screens run off this."},
+  relay:{tag:"On/off control", name:"Waveshare 8-ch Modbus relay",
+    desc:"On/off control for the gear that isn't on a VFD — barrel fans, wall/roof exhaust, and powered louvers."},
+  psu24:{tag:"Power", name:"24 V DC supply",
+    desc:"Powers the AAEON, sensors, and pilot relays."},
+  psu12:{tag:"Power", name:"12 V brick",
+    desc:"For the bits that need 12 V."},
+  breaker:{tag:"Protection", name:"Breakers + surge protection",
+    desc:"Branch breakers feed the supplies; surge protection guards the cabinet in an industrial environment."},
+  rs485:{tag:"Comms terminals", name:"2× RS-485 chain terminals",
+    desc:"One terminal block per port, each with biasing + end-of-line termination. Up to 50 devices total across both chains."},
+  firealarm:{tag:"Life-safety", name:"Fire-alarm interlock terminal",
+    desc:"Dry contact in to GPIO27. FanOS Pro SEES the alarm, stops fans in software, and annunciates. It does NOT replace the hardwired life-safety shutdown the fire-alarm contractor lands per code."},
+  glands:{tag:"Field entry", name:"Cable glands",
+    desc:"Field-wiring entry at the bottom — power in, the two comms chains, and the network drop."},
+  cooling:{tag:"Thermal", name:"Cabinet cooling",
+    desc:"Filtered intake + roof exhaust to keep the electronics cool. (Added per your earlier note.)"},
+  vfd:{tag:"Field · VFD", name:"Fan drive (VFD)",
+    desc:"Out by the fan — Invertek Optidrive E3/P2/Eco, Schneider ATV320, or Yaskawa V1000. FanOS Pro reads its status and commands run + speed over RS-485, and can reset a fault. It never edits drive parameters."},
+  fan:{tag:"Field · HVLS", name:"HVLS fan",
+    desc:"Driven by its own VFD. The speed you set on the dashboard shows up here."},
+  disconnect:{tag:"Field · Line power", name:"Drive disconnect (separate feed)",
+    desc:"Line voltage to each VFD comes from the building panel through a local disconnect — NOT from the FanOS Pro cabinet. Your cabinet brings only comms. Two things land at each drive: line power in (this) and RS-485 in (from you)."},
+  acterm:{tag:"AC terminals", name:"Power distribution terminals",
+    desc:"Where incoming line / neutral / ground land and split to the breakers and supplies."},
+  ground:{tag:"Bonding", name:"Ground / bond bar",
+    desc:"Copper ground bar. Every component, the sub-panel, the enclosure, and the incoming ground all bond here. Green conductors tie it together."},
+  screen:{tag:"Touchscreen", name:"27\" master touchscreen",
+    desc:"PoE-powered. Runs the same FanOS Pro dashboard. One Cat6 from the cabinet's PoE switch carries data + power."},
+  exhaust:{tag:"On/off device", name:"Wall exhaust fan",
+    desc:"On/off, not on a VFD. Switched by the Waveshare relay module over a relay output."},
+  louver:{tag:"On/off device", name:"Powered louver",
+    desc:"On/off intake louver, also switched by a relay output from the module."},
+  din:{tag:"Hardware", name:"DIN rail",
+    desc:"Standard 35 mm rail. Every module clips on here, stacked top-to-bottom."}
+};
+
+/* ---------------- Scene ---------------- */
+var sceneEl=document.getElementById('scene');
+var W=window.innerWidth,H=window.innerHeight;
+var renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.06;
+sceneEl.appendChild(renderer.domElement);
+
+var scene=new THREE.Scene(); scene.background=new THREE.Color(0x0a1929);
+scene.fog=new THREE.Fog(0x0a1929, 130, 280);
+var camera=new THREE.PerspectiveCamera(44,W/H,0.1,2000);
+
+scene.add(new THREE.AmbientLight(0xffffff,0.32));
+var key=new THREE.DirectionalLight(0xffffff,1.15);
+key.position.set(28,46,34); key.castShadow=true;
+key.shadow.mapSize.width=2048; key.shadow.mapSize.height=2048;
+key.shadow.camera.near=1; key.shadow.camera.far=180; key.shadow.radius=4; key.shadow.bias=-0.0004;
+key.shadow.camera.left=-60;key.shadow.camera.right=60;key.shadow.camera.top=60;key.shadow.camera.bottom=-60;
+scene.add(key);
+var rim=new THREE.DirectionalLight(0x2196f3,0.4); rim.position.set(-30,12,-26); scene.add(rim);
+var fill=new THREE.DirectionalLight(0xbfe0ff,0.3); fill.position.set(20,6,30); scene.add(fill);
+
+// Image-based lighting (procedural HDR-ish environment) for realistic reflections.
+// Wrapped: if a device's WebGL can't build the PMREM target, skip IBL and keep loading.
+try {
+  var c=document.createElement('canvas'); c.width=512; c.height=256; var x=c.getContext('2d');
+  var g=x.createLinearGradient(0,0,0,256);
+  g.addColorStop(0,'#33485c'); g.addColorStop(0.5,'#18242f'); g.addColorStop(1,'#0a0f15');
+  x.fillStyle=g; x.fillRect(0,0,512,256);
+  x.fillStyle='#dbe7f2'; x.fillRect(110,8,292,46);          // overhead softbox
+  x.fillStyle='#7d8c9a'; x.fillRect(0,74,512,10);           // ceiling light strip
+  x.fillStyle='#566472'; x.fillRect(0,116,512,7);
+  var t=new THREE.CanvasTexture(c); t.mapping=THREE.EquirectangularReflectionMapping;
+  var pmrem=new THREE.PMREMGenerator(renderer);
+  var rt=pmrem.fromEquirectangular(t);
+  scene.environment=rt.texture;
+  t.dispose(); pmrem.dispose();
+} catch(err){
+  console.warn('IBL environment skipped:', err && err.message);
+  scene.add(new THREE.AmbientLight(0xbfd4e6,0.25)); // gentle fallback fill
+}
+
+var ground=new THREE.Mesh(new THREE.PlaneGeometry(600,600),
+  new THREE.MeshStandardMaterial({color:0x0a1726,roughness:1,metalness:0}));
+ground.rotation.x=-Math.PI/2; ground.position.y=-10.05; ground.receiveShadow=true; scene.add(ground);
+
+// soft contact shadow under the cabinet (grounds it)
+(function(){
+  var c=document.createElement('canvas'); c.width=256; c.height=256; var x=c.getContext('2d');
+  var g=x.createRadialGradient(128,128,8,128,128,128);
+  g.addColorStop(0,'rgba(0,0,0,0.5)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  x.fillStyle=g; x.fillRect(0,0,256,256);
+  var t=new THREE.CanvasTexture(c);
+  var sh=new THREE.Mesh(new THREE.PlaneGeometry(26,16),
+    new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,toneMapped:false}));
+  sh.rotation.x=-Math.PI/2; sh.position.set(0,-9.98,0); scene.add(sh);
+})();
+
+/* ---------------- Materials (industrial PBR) ---------------- */
+// mat(color,{r:roughness,m:metalness,ei:envMapIntensity,cc:clearcoat,ccr:clearcoatRoughness})
+function mat(c,o){o=o||{};
+  var base={color:c,roughness:o.r!==undefined?o.r:0.7,metalness:o.m!==undefined?o.m:0.2};
+  var m=(o.cc!==undefined)
+    ? new THREE.MeshPhysicalMaterial(Object.assign(base,{clearcoat:o.cc,clearcoatRoughness:o.ccr!==undefined?o.ccr:0.3}))
+    : new THREE.MeshStandardMaterial(base);
+  m.envMapIntensity=o.ei!==undefined?o.ei:0.55;
+  return m;
+}
+var M={
+  white:   mat(0xeef2f6,{r:0.5,m:0.0,ei:0.6,cc:0.7,ccr:0.35}), // powder coat (clearcoat sheen)
+  door:    mat(0xf3f6f9,{r:0.48,m:0.0,ei:0.6,cc:0.7,ccr:0.35}),
+  plate:   mat(0xcdd6de,{r:0.45,m:0.75,ei:0.9}),              // galvanized sub-panel
+  rail:    mat(0xcaced2,{r:0.38,m:0.96,ei:1.1}),             // brushed aluminum
+  aaeon:   mat(0x1a2530,{r:0.7,m:0.1,ei:0.4}),                // matte black case
+  aaeonT:  mat(0x2196f3,{r:0.4,m:0.2,ei:0.7}),
+  eth:     mat(0x121820,{r:0.72,m:0.05,ei:0.35}),             // matte plastic
+  poe:     mat(0x141c25,{r:0.72,m:0.05,ei:0.35}),
+  relay:   mat(0x101b27,{r:0.78,m:0.0,ei:0.3}),               // injection-molded plastic
+  relayT:  mat(0x2f9d63,{r:0.55,m:0.1,ei:0.5}),
+  psu:     mat(0xe6eaee,{r:0.4,m:0.55,ei:0.9}),               // brushed steel supply case
+  psu12:   mat(0x1d242b,{r:0.6,m:0.3,ei:0.5}),
+  brk:     mat(0x1c2026,{r:0.5,m:0.1,ei:0.4}),                // satin black breakers
+  brkT:    mat(0x10151b,{r:0.55,m:0.15,ei:0.4}),
+  termG:   mat(0x8a929c,{r:0.6,m:0.25,ei:0.5}),
+  termB:   mat(0x2196f3,{r:0.5,m:0.15,ei:0.6}),
+  fire:    mat(0xb23b3b,{r:0.55,m:0.15,ei:0.5}),
+  gland:   mat(0x12181e,{r:0.45,m:0.6,ei:0.7}),               // nickel-plated gland
+  fanHouse:mat(0x14191f,{r:0.6,m:0.3,ei:0.5}),
+  fanBlade:mat(0x4c5560,{r:0.5,m:0.4,ei:0.6}),
+  vfdBody: mat(0xd9dee4,{r:0.5,m:0.2,ei:0.5}),
+  vfdFace: mat(0x141d27,{r:0.4,m:0.2,ei:0.6}),
+  vfdT:    mat(0x2196f3,{r:0.4,m:0.2,ei:0.7}),
+  hvlsHub: mat(0x1a242e,{r:0.5,m:0.5,ei:0.7}),
+  hvlsBlade:mat(0xe7ecf1,{r:0.45,m:0.25,ei:0.7}),
+  wireB:   mat(0x2196f3,{r:0.35,m:0.0,ei:0.5}),               // glossy insulation
+  wireW:   mat(0xdfe3ea,{r:0.35,m:0.0,ei:0.5}),
+  wireBk:  mat(0x0d141b,{r:0.38,m:0.0,ei:0.45}),
+  wireG:   mat(0x2f9d63,{r:0.35,m:0.0,ei:0.5}),
+  motor:   mat(0x222b34,{r:0.5,m:0.15,ei:0.45}),
+  wireR:   mat(0xe53935,{r:0.35,m:0.0,ei:0.5}),
+  wireC:   mat(0x26c6da,{r:0.35,m:0.0,ei:0.5}),
+  wireO:   mat(0xfb8c00,{r:0.35,m:0.0,ei:0.5}),
+  copper:  mat(0xb87333,{r:0.32,m:1.0,ei:1.15}),              // copper ground bar
+  disc:    mat(0x2a3138,{r:0.6,m:0.2,ei:0.45}),
+  screen:  mat(0x0c1622,{r:0.35,m:0.2,ei:0.5})
+};
+
+var cabinet=new THREE.Group(); scene.add(cabinet);
+var selectable=[], partRefs={};
+function box(w,h,d,material,key){
+  var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
+  m.castShadow=true; m.receiveShadow=true;
+  if(key){ m.userData.key=key; selectable.push(m); (partRefs[key]=partRefs[key]||[]).push(m); }
+  return m;
+}
+function place(m,x,y,z){m.position.set(x,y,z);return m;}
+
+/* ---------------- Enclosure — to scale, 16W x 20H x 8D ---------------- */
+var EW=16, EH=20, ED=8, WALL=0.6;
+cabinet.add(place(box(EW,EH,WALL,M.white,'enclosure'),0,0,-ED/2));
+cabinet.add(place(box(WALL,EH,ED,M.white,'enclosure'),-EW/2+WALL/2,0,0));
+cabinet.add(place(box(WALL,EH,ED,M.white,'enclosure'), EW/2-WALL/2,0,0));
+cabinet.add(place(box(EW,WALL,ED,M.white,'enclosure'),0, EH/2-WALL/2,0));
+cabinet.add(place(box(EW,WALL,ED,M.white,'enclosure'),0,-EH/2+WALL/2,0));
+
+var SPz=-ED/2+1.0;
+cabinet.add(place(box(EW-2.0,EH-2.0,0.3,M.plate,'backplate'),0,0,SPz));
+var railZ=SPz+0.5, compZ=railZ+1.1;
+[4.0,-0.6,-6.8].forEach(function(y){ cabinet.add(place(box(EW-2.6,0.4,0.5,M.rail,'din'),0,y,railZ)); });
+
+// AAEON UP 7000 Edge — 3.62 x 1.78 x 2.52 (small mini-PC, panel mount top-left)
+cabinet.add(place(box(3.62,1.78,2.52,M.aaeon,'aaeon'),-4.3,7.7,railZ+1.3));
+var aTrim=new THREE.Mesh(new THREE.BoxGeometry(3.62,0.16,0.06),M.aaeonT);
+aTrim.position.set(-4.3,8.6,railZ+2.6); cabinet.add(aTrim);
+cabinet.add(place(box(0.4,0.4,0.35,M.aaeonT,'aaeon'),-3.0,7.1,railZ+2.6)); // RS-485 ttyS0
+cabinet.add(place(box(0.4,0.4,0.35,M.aaeonT,'aaeon'),-2.5,7.1,railZ+2.6)); // RS-485 ttyS1
+
+// Ethernet switch 1.2 x 3.9 x 2.8 (DIN)
+cabinet.add(place(box(1.2,3.9,2.8,M.eth,'eth'),-0.6,6.0,compZ));
+// PoE switch 2.0 x 4.9 x 3.0 (DIN, tall)
+cabinet.add(place(box(2.0,4.9,3.0,M.poe,'poe'),3.4,6.0,compZ));
+// 24V supply 1.6 x 3.5 x 2.2  +  12V brick 0.8 x 3.5
+cabinet.add(place(box(1.6,3.5,2.2,M.psu,'psu24'),-5.4,1.9,compZ));
+cabinet.add(place(box(0.8,3.5,2.2,M.psu12,'psu12'),-4.2,1.9,compZ));
+// Waveshare 8-ch relay 4.8 x 2.8 x 1.4
+cabinet.add(place(box(4.8,2.8,1.4,M.relay,'relay'),-0.4,1.5,compZ));
+for(var rb=0;rb<8;rb++){ cabinet.add(place(box(0.4,0.8,0.4,M.relayT,'relay'),-2.4+rb*0.6,1.1,compZ+0.75)); }
+// breakers (3 poles @0.7) + SPD
+for(var bk=0;bk<3;bk++){ cabinet.add(place(box(0.66,3.0,1.6,M.brk,'breaker'),-5.6+bk*0.72,-3.0,compZ)); }
+cabinet.add(place(box(1.4,3.0,1.6,M.brkT,'breaker'),-3.0,-3.0,compZ)); // SPD
+
+// ground/bond bar (copper)
+cabinet.add(place(box(9,0.5,0.6,M.copper,'ground'),-2,-5.6,compZ));
+
+// terminal blocks at the bottom rail
+function termGroup(n,topMat,key,x,y,sp){
+  var g=new THREE.Group();
+  for(var i=0;i<n;i++){ g.add(place(box(0.32,1.3,1.0,M.termG,key),i*sp,0,0));
+    g.add(place(box(0.32,0.26,1.0,topMat,key),i*sp,0.6,0)); }
+  place(g,x,y,compZ-0.2); cabinet.add(g); return g;
+}
+termGroup(3,M.termB,'rs485',-6.0,-7.0,0.4);    // RS-485 chain A (A/B/SHLD)
+termGroup(3,M.termB,'rs485',-4.4,-7.0,0.4);    // RS-485 chain B
+termGroup(3,M.termG,'acterm',-2.6,-7.0,0.4);   // AC L/N/G
+termGroup(2,M.fire,'firealarm',-0.6,-7.0,0.4); // fire-alarm dry contact
+termGroup(4,M.relayT,'relay',1.2,-7.0,0.4);    // relay outputs
+
+// labeled conduit entries (bottom): supply / comms A / comms B / ethernet / relay
+var gxs=[-5,-3,-1,1,3];
+gxs.forEach(function(gx){
+  var gl=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,1.2,18),M.gland);
+  gl.castShadow=true; gl.userData.key='glands'; selectable.push(gl);
+  (partRefs.glands=partRefs.glands||[]).push(gl);
+  gl.position.set(gx,-EH/2-0.3,0); cabinet.add(gl);
+});
+
+/* ---------------- Cabinet cooling — SIDE mounted (cross-flow) ---------------- */
+var coolingBlades=[];
+function makeFan(d,depth){
+  var g=new THREE.Group();
+  var hs=new THREE.Mesh(new THREE.CylinderGeometry(d/2,d/2,depth,24),M.fanHouse);
+  hs.castShadow=true; hs.userData.key='cooling'; selectable.push(hs);
+  (partRefs.cooling=partRefs.cooling||[]).push(hs); g.add(hs);
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(d*0.16,d*0.16,depth*0.85,16),M.aaeon));
+  var bl=new THREE.Group();
+  for(var b=0;b<6;b++){ var v=new THREE.Mesh(new THREE.BoxGeometry(d*0.4,0.1,depth*0.45),M.fanBlade);
+    v.position.x=d*0.22; v.rotation.x=0.5; var h=new THREE.Group(); h.add(v);
+    h.rotation.y=b*(Math.PI/3); bl.add(h); }
+  g.add(bl); coolingBlades.push(bl);
+  for(var k=0;k<2;k++){ var bar=new THREE.Mesh(new THREE.BoxGeometry(d*1.02,0.08,0.12),M.fanHouse);
+    bar.position.y=depth*0.5; bar.rotation.y=k*Math.PI/2; g.add(bar); }
+  return g;
+}
+function sideFan(x,y){
+  var f=makeFan(4.5,1.2); f.rotation.z=Math.PI/2; f.position.set(x,y,0); cabinet.add(f);
+  var ring=new THREE.Mesh(new THREE.TorusGeometry(2.5,0.22,8,22),M.fanHouse);
+  ring.rotation.y=Math.PI/2; ring.position.set(x,y,0);
+  ring.userData.key='cooling'; selectable.push(ring);(partRefs.cooling=partRefs.cooling||[]).push(ring);
+  cabinet.add(ring);
+}
+sideFan(-EW/2,-5.5); // intake, low on left side
+sideFan( EW/2, 5.5); // exhaust, high on right side
+
+/* ---------------- Logo on the door ---------------- */
+function roundRect(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);
+  x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+function makeLogoTex(){
+  var c=document.createElement('canvas'); c.width=512; c.height=320; var x=c.getContext('2d');
+  x.clearRect(0,0,512,320); x.lineCap='round';
+  x.lineWidth=13; x.strokeStyle='#0a1929';
+  x.beginPath(); x.arc(112,150,68,0,Math.PI*2); x.stroke();
+  x.lineWidth=13; x.strokeStyle='#2196f3';
+  x.beginPath(); x.arc(112,150,68,0.02*Math.PI,0.55*Math.PI); x.stroke();
+  x.strokeStyle='#0a1929'; x.lineWidth=11;
+  for(var i=0;i<3;i++){ x.save(); x.translate(112,150); x.rotate(i*2*Math.PI/3);
+    x.beginPath(); x.moveTo(0,0); x.lineTo(0,-44); x.stroke(); x.restore(); }
+  x.fillStyle='#0a1929'; x.beginPath(); x.arc(112,150,9,0,Math.PI*2); x.fill();
+  x.fillStyle='#0a1929'; x.font='800 60px -apple-system,Arial,sans-serif'; x.textBaseline='middle';
+  x.fillText('FanOS',206,128);
+  x.fillStyle='#2196f3'; roundRect(x,206,158,86,44,10); x.fill();
+  x.fillStyle='#fff'; x.font='800 30px Arial'; x.fillText('Pro',224,181);
+  x.fillStyle='#6b7d8c'; x.font='700 20px Arial'; x.fillText('AIR MOVEMENT CONTROL',206,228);
+  var t=new THREE.CanvasTexture(c); t.anisotropy=4; t.encoding=THREE.sRGBEncoding; return t;
+}
+var logoPlane=new THREE.Mesh(new THREE.PlaneGeometry(10,6.2),
+  new THREE.MeshBasicMaterial({map:makeLogoTex(),transparent:true,toneMapped:false}));
+
+/* ---------------- Door ---------------- */
+var doorPivot=new THREE.Group(); doorPivot.position.set(-EW/2,0,ED/2); cabinet.add(doorPivot);
+var door=box(EW,EH,WALL,M.door,'enclosure'); door.position.set(EW/2,0,0); doorPivot.add(door);
+logoPlane.position.set(EW/2,3.0,WALL/2+0.05); doorPivot.add(logoPlane);
+var handle=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,2.8,12),M.rail);
+handle.rotation.x=Math.PI/2; handle.position.set(EW-1.2,-5,0.5);
+handle.userData.key='enclosure'; selectable.push(handle);(partRefs.enclosure=partRefs.enclosure||[]).push(handle);
+doorPivot.add(handle);
+
+/* ---------------- Field: fans out in the space, each on its own VFD ---------------- */
+function tube(p1,p2,material,rad){
+  var dir=new THREE.Vector3().subVectors(p2,p1), len=dir.length();
+  var m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len,8),material); m.castShadow=true;
+  m.position.copy(p1).add(p2).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize());
+  return m;
+}
+function makeVFD(){
+  var g=new THREE.Group();
+  g.add(box(2.0,3.0,1.6,M.vfdBody,'vfd'));
+  var face=place(box(1.3,1.6,0.1,M.vfdFace,'vfd'),0,0.3,0.85); g.add(face);
+  g.add(place(box(1.0,0.4,0.06,M.vfdT,'vfd'),0,0.7,0.92));
+  return g;
+}
+function makeHVLS(d){
+  var g=new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,1.4,16),M.hvlsHub));
+  var cap=new THREE.Mesh(new THREE.CylinderGeometry(1.3,0.9,0.6,16),M.hvlsHub); cap.position.y=0.9; g.add(cap);
+  var rod=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,4,10),M.motor); rod.position.y=2.6; g.add(rod);
+  var blades=new THREE.Group();
+  for(var b=0;b<6;b++){ var v=new THREE.Mesh(new THREE.BoxGeometry(d,0.16,1.0),M.hvlsBlade);
+    v.position.x=d/2+0.5; v.castShadow=true; var h=new THREE.Group(); h.add(v);
+    h.rotation.y=b*(Math.PI/3); blades.add(h); }
+  g.add(blades); return {group:g, blades:blades};
+}
+
+// fans placed away; each VFD sits directly under its fan (clean vertical motor lead)
+var farmFans=[
+  {name:'Fan 1', zone:'A', chain:0, on:false, cmd:60, rpm:0, fault:false,
+     vfd:new THREE.Vector3(-22,-2,-6), fan:new THREE.Vector3(-22,12,-6)},
+  {name:'Fan 2', zone:'A', chain:0, on:false, cmd:80, rpm:0, fault:false,
+     vfd:new THREE.Vector3(0,-2,-22), fan:new THREE.Vector3(0,14,-22)},
+  {name:'Fan 3', zone:'B', chain:1, on:false, cmd:45, rpm:0, fault:false,
+     vfd:new THREE.Vector3(20,-2,-3), fan:new THREE.Vector3(20,11,-3)}
+];
+var MAXRPM=150, farmBlades=[], driveMeshes=[];
+var field=new THREE.Group(); scene.add(field);
+
+// ---- wiring split into toggleable system layers ----
+var SYS={ power:new THREE.Group(), dc:new THREE.Group(), comms:new THREE.Group(),
+          ground:new THREE.Group(), ethernet:new THREE.Group(), relay:new THREE.Group() };
+Object.keys(SYS).forEach(function(k){ scene.add(SYS[k]); });
+
+function V(a,b,c){ return new THREE.Vector3(a,b,c); }
+function runPath(points,material,rad,group){
+  for(var k=0;k<points.length-1;k++){ group.add(tube(points[k],points[k+1],material,rad)); }
+  for(var j=1;j<points.length-1;j++){ var s=new THREE.Mesh(new THREE.SphereGeometry(rad*1.2,10,10),material);
+    s.position.copy(points[j]); s.castShadow=true; group.add(s); }
+}
+var z0=compZ, yT=-9.5;
+
+// ---- field devices + their power/ground ----
+farmFans.forEach(function(f,i){
+  var v=makeVFD(); v.position.copy(f.vfd); field.add(v);
+  var body=v.children[0]; body.userData.idx=i; driveMeshes.push(body); body.material=M.vfdBody.clone();
+  var hv=makeHVLS(5.6); hv.group.position.copy(f.fan); field.add(hv.group);
+  farmBlades.push(hv.blades);
+  hv.group.children.forEach(function(ch){ if(ch.geometry){ ch.userData.key='fan'; selectable.push(ch);
+    (partRefs.fan=partRefs.fan||[]).push(ch); } });
+  var d=box(1.4,2.0,1.0,M.disc,'disconnect'); d.position.set(f.vfd.x-2.4,f.vfd.y,f.vfd.z); field.add(d);
+  runPath([V(f.vfd.x-2.4,yT,f.vfd.z),V(f.vfd.x-2.4,f.vfd.y-1.0,f.vfd.z)],M.wireBk,0.09,SYS.power);
+  runPath([V(f.vfd.x-2.4,f.vfd.y+1.0,f.vfd.z),V(f.vfd.x-2.4,f.vfd.y+1.4,f.vfd.z),V(f.vfd.x-1.0,f.vfd.y+1.4,f.vfd.z),V(f.vfd.x-1.0,f.vfd.y+1.5,f.vfd.z)],M.wireBk,0.08,SYS.power);
+  SYS.power.add(tube(V(f.vfd.x,f.vfd.y+1.6,f.vfd.z), V(f.fan.x,f.fan.y-1.0,f.fan.z), M.motor, 0.16));
+  runPath([V(f.vfd.x+0.9,f.vfd.y-1.4,f.vfd.z),V(f.vfd.x+0.9,yT,f.vfd.z)],M.wireG,0.07,SYS.ground);
+});
+
+// ---- COMMS: two RS-485 chains, floor tray, 90° ----
+runPath([V(-3,-10.3,0),V(-3,yT,0),V(-3,yT,-6),V(-22,yT,-6),V(0,yT,-6),V(0,yT,-22)],M.wireB,0.1,SYS.comms);
+runPath([V(-22,yT,-6),V(-22,-3.5,-6)],M.wireB,0.1,SYS.comms);
+runPath([V(0,yT,-22),V(0,-3.5,-22)],M.wireB,0.1,SYS.comms);
+runPath([V(-1,-10.3,0),V(-1,yT,0),V(-1,yT,-3),V(20,yT,-3)],M.wireB,0.1,SYS.comms);
+runPath([V(20,yT,-3),V(20,-3.5,-3)],M.wireB,0.1,SYS.comms);
+// internal RS-485 + fire: short stubs into wireway (long runs hidden in duct)
+runPath([V(-5.6,-6.4,z0),V(-5.6,-8.0,z0)],M.wireB,0.06,SYS.comms);
+runPath([V(-4.0,-6.4,z0),V(-4.0,-8.0,z0)],M.wireB,0.06,SYS.comms);
+runPath([V(-3.0,7.1,z0),V(-3.0,8.3,z0)],M.wireB,0.06,SYS.comms);
+runPath([V(-2.5,7.1,z0),V(-2.5,8.3,z0)],M.wireB,0.06,SYS.comms);
+runPath([V(-0.6,-6.4,z0),V(-0.6,-8.0,z0)],M.wireG,0.06,SYS.comms);
+
+// ---- POWER (internal): short stubs at gland / breakers / supplies ----
+runPath([V(-5,-10.3,0),V(-5,-8.8,0)],M.wireBk,0.1,SYS.power);
+runPath([V(-5.3,-10.3,0),V(-5.3,-8.8,0)],M.wireW,0.09,SYS.power);
+runPath([V(-4.5,-1.5,z0),V(-4.5,-0.6,z0)],M.wireBk,0.08,SYS.power);
+runPath([V(-5.4,0.1,z0),V(-5.4,-0.6,z0)],M.wireBk,0.08,SYS.power);
+runPath([V(-4.2,0.1,z0),V(-4.2,-0.6,z0)],M.wireBk,0.08,SYS.power);
+
+// ---- DC branches: short stubs into duct ----
+runPath([V(-6.1,7.7,z0),V(-7,7.7,z0)],M.wireR,0.07,SYS.dc);
+runPath([V(-5.4,3.65,z0),V(-5.4,3.95,z0)],M.wireR,0.06,SYS.dc);
+runPath([V(-0.6,4.05,z0),V(-0.6,3.75,z0)],M.wireR,0.06,SYS.dc);
+runPath([V(3.4,3.55,z0),V(3.4,3.95,z0)],M.wireR,0.06,SYS.dc);
+runPath([V(-0.4,2.9,z0),V(-0.4,3.75,z0)],M.wireR,0.06,SYS.dc);
+
+// ---- GROUND: short bonds to the bar (ring terminals added below) ----
+[-5,-3.2,-1,1,2.5].forEach(function(gx){ runPath([V(gx,-4.9,z0),V(gx,-5.35,z0)],M.wireG,0.06,SYS.ground); });
+runPath([V(-4.7,-10.3,0),V(-4.7,-8.8,0)],M.wireG,0.07,SYS.ground);
+
+// ---- ETHERNET: short stubs at AAEON + switches ----
+runPath([V(-3.6,7.0,z0),V(-3.6,8.0,z0)],M.wireC,0.06,SYS.ethernet);
+runPath([V(-0.6,7.95,z0),V(-0.6,8.4,z0)],M.wireC,0.06,SYS.ethernet);
+runPath([V(3.4,8.45,z0),V(3.4,8.8,z0)],M.wireC,0.06,SYS.ethernet);
+
+// touchscreen in the field + PoE Cat6 (field run)
+var stand=new THREE.Group();
+stand.add(place(box(0.5,12,0.5,M.disc),0,-4,0));
+var scr=box(7,4.2,0.5,M.screen,'screen'); scr.position.set(0,1.5,0); stand.add(scr);
+var scrFace=new THREE.Mesh(new THREE.PlaneGeometry(6.3,3.5),new THREE.MeshBasicMaterial({color:0x103a5c,toneMapped:false}));
+scrFace.position.set(0,1.5,0.27); stand.add(scrFace);
+stand.position.set(13,0,8); field.add(stand);
+runPath([V(1,-10.3,0),V(1,yT,0),V(1,yT,8),V(13,yT,8),V(13,-4,8),V(13,0.6,8)],M.wireC,0.07,SYS.ethernet);
+
+// ---- RELAY outputs: stub at module + field runs to on/off devices ----
+runPath([V(-0.4,0.1,z0),V(-0.4,-0.6,z0)],M.wireO,0.07,SYS.relay);
+var ex=box(3,3,1.6,M.eth,'exhaust'); ex.position.set(-13,7,-22); field.add(ex);
+var lv=box(3.2,2,1.2,M.disc,'louver'); lv.position.set(11,4,-22); field.add(lv);
+runPath([V(3,-10.3,0),V(3,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],M.wireO,0.06,SYS.relay);
+runPath([V(3,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],M.wireO,0.06,SYS.relay);
+
+/* ---------------- Phase 2: panel hardware (duct, ferrules, terminals, bonding) ---------------- */
+M.duct    = mat(0xc2c8cf,{r:0.85,m:0.0,ei:0.3});
+M.ferrule = mat(0xc8ccd0,{r:0.3,m:0.9,ei:0.8});
+M.marker  = mat(0xf2f4f6,{r:0.7,m:0.0,ei:0.2});
+M.ziptie  = mat(0x0c0f12,{r:0.6,m:0.0,ei:0.2});
+M.gystrap = mat(0x9bbf2a,{r:0.5,m:0.1,ei:0.4});
+M.ring    = mat(0xb87333,{r:0.4,m:0.9,ei:0.9});
+M.screw   = mat(0x9aa1a8,{r:0.4,m:0.85,ei:0.8});
+var fx=new THREE.Group(); cabinet.add(fx);
+var fz=compZ-0.6;
+
+// slotted Panduit-style duct (texture = slots, keeps mesh count low)
+var DT=(function(){ var c=document.createElement('canvas'); c.width=64;c.height=64; var x=c.getContext('2d');
+  x.fillStyle='#c2c8cf'; x.fillRect(0,0,64,64); x.fillStyle='#7c838b';
+  for(var i=0;i<4;i++){ x.fillRect(6+i*16,8,5,48); }
+  var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.encoding=THREE.sRGBEncoding; return t; })();
+function makeDuct(cx,cy,len,vertical){
+  var th=0.85, dp=1.0, mtl=M.duct.clone(); mtl.map=DT.clone(); mtl.map.needsUpdate=true;
+  mtl.map.repeat.set(vertical?1:len/1.6, vertical?len/1.6:1);
+  var b=new THREE.Mesh(new THREE.BoxGeometry(vertical?th:len, vertical?len:th, dp), mtl);
+  b.position.set(cx,cy,fz); b.castShadow=true; b.receiveShadow=true; fx.add(b);
+}
+makeDuct(-7.0,0,16,true); makeDuct(7.0,0,16,true);
+makeDuct(0,3.85,13,false); makeDuct(0,-0.8,13,false); makeDuct(0,-8.6,13,false);
+
+// terminal hardware: number strips, end stops, screw heads, ferrules + markers
+var ftz=compZ+0.35;
+[{x:-6.0,n:3},{x:-4.4,n:3},{x:-2.6,n:3},{x:-0.6,n:2},{x:1.2,n:4}].forEach(function(td){
+  var sp=0.4, y=-7.0;
+  fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(td.n*sp+0.2,0.3,0.05),M.marker), td.x+(td.n-1)*sp/2, y+1.0, ftz+0.02));
+  [-0.28, (td.n-1)*sp+0.28].forEach(function(ox){
+    fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(0.12,1.5,1.0),M.termG), td.x+ox, y, compZ-0.2)); });
+  for(var i=0;i<td.n;i++){ var tx=td.x+i*sp;
+    var sc=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.08,10),M.screw); sc.rotation.x=Math.PI/2;
+    fx.add(place(sc,tx,y+0.4,ftz+0.04));
+    fx.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.3,8),M.ferrule), tx,y+0.95,ftz));
+    fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(0.13,0.22,0.04),M.marker), tx,y+1.28,ftz+0.03));
+  }
+});
+// jumper bar across two AC terminals
+fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(0.5,0.1,0.12),M.screw),-2.4,-6.55,ftz+0.05));
+
+// ground ring terminals on the copper bar
+[-5,-3.2,-1,1,2.5].forEach(function(gx){
+  var r=new THREE.Mesh(new THREE.TorusGeometry(0.13,0.05,6,12),M.ring); fx.add(place(r,gx,-5.35,compZ+0.3)); });
+
+// cable gland realism: locknuts + rubber grommets + a bottom tray
+[-5,-3,-1,1,3].forEach(function(gx){
+  fx.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,0.25,6),M.screw), gx,-EH/2+0.2,0));
+  var gr=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.12,6,14),M.ziptie); gr.rotation.x=Math.PI/2;
+  fx.add(place(gr,gx,-EH/2-0.35,0));
+});
+fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(EW-2,0.8,1.4),M.disc),0,-EH/2-1.4,0));
+
+// door bonding strap (green/yellow, swings with the door)
+var strap=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.18,0.12),M.gystrap);
+strap.position.set(1.0,-7.6,0.55); strap.rotation.z=0.35; doorPivot.add(strap);
+
+// zip ties + a service loop on the field bundles
+function ziptieAt(p,grp){ var z=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.05,6,12),M.ziptie);
+  z.rotation.y=Math.PI/2; grp.add(place(z,p.x,p.y,p.z)); }
+[V(-12,yT,-6),V(-6,yT,-6),V(0,yT,-14),V(8,yT,-3)].forEach(function(p){ ziptieAt(p,SYS.comms); });
+ziptieAt(V(-22,4,-6),SYS.power); ziptieAt(V(20,4,-3),SYS.power);
+var loop=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.09,8,16,Math.PI*1.5),M.wireBk);
+loop.rotation.y=Math.PI/2; loop.position.set(-19.6,-1,-6); SYS.power.add(loop);
+
+/* ---------------- Orbit controls (mouse + touch) ---------------- */
+var target=new THREE.Vector3(0,1,-6);
+var sph={radius:70,theta:0.62,phi:1.18};
+function applyCam(){
+  camera.position.x=target.x+sph.radius*Math.sin(sph.phi)*Math.sin(sph.theta);
+  camera.position.y=target.y+sph.radius*Math.cos(sph.phi);
+  camera.position.z=target.z+sph.radius*Math.sin(sph.phi)*Math.cos(sph.theta);
+  camera.lookAt(target);
+}
+applyCam();
+var pointers={},lastSingle=null,pinchStart=0,radiusStart=0,downInfo=null;
+var el=renderer.domElement;
+function pos(e){return {x:e.clientX,y:e.clientY};}
+el.addEventListener('pointerdown',function(e){ el.setPointerCapture(e.pointerId); pointers[e.pointerId]=pos(e);
+  var n=Object.keys(pointers).length;
+  if(n===1){ lastSingle=pos(e); downInfo={x:e.clientX,y:e.clientY,t:Date.now()}; }
+  if(n===2){ var p=Object.values(pointers); pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    radiusStart=sph.radius; downInfo=null; }
+});
+el.addEventListener('pointermove',function(e){ if(!pointers[e.pointerId])return; pointers[e.pointerId]=pos(e);
+  var n=Object.keys(pointers).length;
+  if(n===1&&lastSingle){ var dx=e.clientX-lastSingle.x,dy=e.clientY-lastSingle.y;
+    sph.theta-=dx*0.006; sph.phi-=dy*0.006; sph.phi=Math.max(0.2,Math.min(Math.PI-0.2,sph.phi));
+    lastSingle=pos(e); applyCam(); hideHint();
+  } else if(n===2){ var p=Object.values(pointers); var d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    if(pinchStart>0){ sph.radius=Math.max(28,Math.min(140,radiusStart*(pinchStart/d))); applyCam(); } }
+});
+function endP(e){
+  if(downInfo&&Object.keys(pointers).length===1){
+    var moved=Math.abs(e.clientX-downInfo.x)+Math.abs(e.clientY-downInfo.y), dt=Date.now()-downInfo.t;
+    if(moved<6&&dt<350){ pick(e.clientX,e.clientY); } }
+  delete pointers[e.pointerId];
+  if(Object.keys(pointers).length<2) pinchStart=0;
+  if(Object.keys(pointers).length===1){ var rp=pointers[Object.keys(pointers)[0]]; lastSingle={x:rp.x,y:rp.y}; }
+  if(Object.keys(pointers).length===0) lastSingle=null;
+}
+el.addEventListener('pointerup',endP);
+el.addEventListener('pointercancel',function(e){ delete pointers[e.pointerId]; pinchStart=0;
+  if(!Object.keys(pointers).length) lastSingle=null; });
+el.addEventListener('wheel',function(e){ e.preventDefault();
+  sph.radius=Math.max(28,Math.min(140,sph.radius*(1+(e.deltaY>0?0.08:-0.08)))); applyCam(); hideHint();
+},{passive:false});
+
+/* ---------------- Picking + info ---------------- */
+var ray=new THREE.Raycaster(), ndc=new THREE.Vector2(), selectedKey=null;
+function pick(cx,cy){ var r=el.getBoundingClientRect();
+  ndc.x=((cx-r.left)/r.width)*2-1; ndc.y=-((cy-r.top)/r.height)*2+1;
+  ray.setFromCamera(ndc,camera);
+  var hits=ray.intersectObjects(selectable,false);
+  if(hits.length){ selectPart(hits[0].object.userData.key); } else { clearSel(); hideInfo(); }
+}
+function setEm(key,on){ (partRefs[key]||[]).forEach(function(m){
+  if(on){ if(!m.userData._clone){ m.material=m.material.clone(); m.userData._clone=true; }
+    m.material.emissive=new THREE.Color(0x2196f3); m.material.emissiveIntensity=0.5; }
+  else { if(m.material.emissive){ m.material.emissive=new THREE.Color(0x000000); m.material.emissiveIntensity=0; } } }); }
+function clearSel(){ if(selectedKey) setEm(selectedKey,false); selectedKey=null; syncChips(); }
+function selectPart(key){ if(!DATA[key])return;
+  if(selectedKey&&selectedKey!==key) setEm(selectedKey,false);
+  selectedKey=key; setEm(key,true); showInfo(key); syncChips(); focusOn(key); hideHint(); }
+function focusOn(key){ var arr=partRefs[key]; if(!arr||!arr.length)return;
+  var c=new THREE.Vector3(); arr.forEach(function(m){ var wp=new THREE.Vector3(); m.getWorldPosition(wp); c.add(wp); });
+  c.multiplyScalar(1/arr.length); animTarget=c; }
+
+var infoEl=document.getElementById('info');
+function showInfo(key){ var d=DATA[key];
+  document.getElementById('iTag').textContent=d.tag;
+  document.getElementById('iName').textContent=d.name;
+  document.getElementById('iDesc').textContent=d.desc; infoEl.classList.add('show'); }
+function hideInfo(){ infoEl.classList.remove('show'); }
+document.getElementById('iClose').onclick=function(){ hideInfo(); clearSel(); };
+
+/* ---------------- Chips ---------------- */
+var chipsEl=document.getElementById('chips');
+var order=['aaeon','rs485','relay','eth','poe','psu24','psu12','breaker','firealarm','vfd','fan','cooling','glands','enclosure'];
+order.forEach(function(key){ var c=document.createElement('div'); c.className='chip'; c.dataset.key=key;
+  c.textContent=DATA[key].name.split(' — ')[0];
+  c.onclick=function(){ if(selectedKey===key){ clearSel(); hideInfo(); } else selectPart(key); };
+  chipsEl.appendChild(c); });
+function syncChips(){ Array.prototype.forEach.call(chipsEl.children,function(c){
+  c.classList.toggle('active',c.dataset.key===selectedKey); }); }
+
+/* ---------------- Dashboard ---------------- */
+var pollIdx=0,pollAcc=0,refreshAcc=0,fireAlarm=false;
+var dashEl=document.getElementById('dash');
+(function buildDash(){
+  var h='<div class="dhead"><div><div class="dtitle">FanOS Pro · Master</div>'+
+    '<div class="dsub" id="pollTxt">Idle</div></div><div class="dhbtns">'+
+    '<button class="pill fire" id="fireBtn">Fire: Normal</button>'+
+    '<button class="stopall" id="stopAll">STOP ALL</button></div></div><div id="zones"></div>';
+  dashEl.innerHTML=h;
+  var zones={}; farmFans.forEach(function(f){ (zones[f.zone]=zones[f.zone]||[]).push(f); });
+  var zc=document.getElementById('zones');
+  Object.keys(zones).forEach(function(z){
+    var zh=document.createElement('div'); zh.className='zhdr'; zh.textContent='Zone '+z; zc.appendChild(zh);
+    zones[z].forEach(function(f){ var i=farmFans.indexOf(f);
+      var r=document.createElement('div'); r.className='drow'; r.dataset.i=i;
+      r.innerHTML='<div class="dleft"><span class="ddot" data-dot></span><div>'+
+        '<div class="dname">'+f.name+' <span style="color:#5e7488;font-weight:600">· RS-485 '+(f.chain?'B':'A')+'</span></div>'+
+        '<div class="drpm" data-rpm>0 rpm · off</div></div></div>'+
+        '<div class="dctrl"><input type="range" min="0" max="100" value="'+f.cmd+'" data-spd>'+
+        '<div class="dbtns"><button class="dbtn" data-go>Start</button>'+
+        '<button class="dbtn warn" data-flt>Test fault</button></div></div>';
+      zc.appendChild(r); });
+  });
+  document.querySelectorAll('#zones .drow').forEach(function(r){ var i=+r.dataset.i;
+    r.querySelector('[data-spd]').addEventListener('input',function(e){ farmFans[i].cmd=+e.target.value; });
+    r.querySelector('[data-go]').addEventListener('click',function(){
+      if(fireAlarm) return; farmFans[i].on=!farmFans[i].on; if(farmFans[i].on) farmFans[i].fault=false; });
+    r.querySelector('[data-flt]').addEventListener('click',function(){
+      var f=farmFans[i]; if(f.fault){ f.fault=false; } else { f.fault=true; f.on=false; } });
+  });
+  document.getElementById('stopAll').addEventListener('click',function(){ farmFans.forEach(function(f){ f.on=false; }); });
+  document.getElementById('fireBtn').addEventListener('click',function(){
+    fireAlarm=!fireAlarm; if(fireAlarm) farmFans.forEach(function(f){ f.on=false; }); });
+})();
+var dashRows=document.querySelectorAll('#zones .drow');
+function refreshDash(){
+  dashRows.forEach(function(r){ var i=+r.dataset.i, f=farmFans[i];
+    r.querySelector('[data-dot]').className='ddot'+(f.fault?' flt':(f.on?' on':''));
+    r.querySelector('[data-rpm]').textContent=Math.round(f.rpm)+' rpm · '+(f.fault?'FAULT':(f.on?'run':'off'));
+    var go=r.querySelector('[data-go]'); go.textContent=f.on?'Stop':'Start';
+    var flt=r.querySelector('[data-flt]');
+    if(f.fault){ flt.textContent='Reset'; flt.className='dbtn reset'; } else { flt.textContent='Test fault'; flt.className='dbtn warn'; }
+  });
+  var fb=document.getElementById('fireBtn');
+  fb.textContent=fireAlarm?'FIRE ALARM':'Fire: Normal'; fb.className='pill fire'+(fireAlarm?' alarm':'');
+  var any=farmFans.some(function(f){return f.on||f.fault;});
+  document.getElementById('pollTxt').textContent=fireAlarm?'Fire interlock active · fans stopped (monitoring only)':
+    (any?('RS-485 '+(farmFans[pollIdx].chain?'B':'A')+' · reading '+farmFans[pollIdx].name):'Idle');
+}
+var dashOpen=false;
+document.getElementById('dashBtn').addEventListener('click',function(){
+  dashOpen=!dashOpen; dashEl.classList.toggle('show',dashOpen); this.classList.toggle('primary',dashOpen); hideHint(); });
+
+/* ---------------- Door / wiring / reset ---------------- */
+var doorOpen=false,doorTarget=0,doorCurrent=0;
+var doorBtn=document.getElementById('doorBtn');
+doorBtn.onclick=function(){ doorOpen=!doorOpen; doorTarget=doorOpen?-2.0:0;
+  doorBtn.textContent=doorOpen?'Close door':'Open door'; hideHint(); };
+var LAYC={power:'#b0b8c0',dc:'#e53935',comms:'#2196f3',ground:'#43d17a',ethernet:'#26c6da',relay:'#fb8c00'};
+var LAYN={power:'Power (AC)',dc:'DC branches',comms:'Comms (RS-485)',ground:'Ground',ethernet:'Ethernet',relay:'Relay outputs'};
+var layDef={power:true,dc:false,comms:true,ground:false,ethernet:false,relay:false};
+Object.keys(SYS).forEach(function(k){ SYS[k].visible=layDef[k]; });
+var layEl=document.getElementById('layers'), layersBtn=document.getElementById('layersBtn');
+(function(){
+  var chips=Object.keys(SYS).map(function(k){
+    return '<div class="lchip'+(layDef[k]?' on':'')+'" data-k="'+k+'">'+
+      '<span class="sw" style="color:'+LAYC[k]+'"></span>'+LAYN[k]+'</div>';
+  }).join('');
+  var spec=[
+    ['#b0b8c0','Incoming AC supply','THHN, L/N/G','14 AWG (120V/15A)'],
+    ['#b0b8c0','Motor leads (VFD→fan)','VFD/motor cable','per motor FLA'],
+    ['#e53935','24 V DC branch','TFFN/MTW','18 AWG'],
+    ['#e53935','12 V DC branch','TFFN/MTW','18 AWG'],
+    ['#2196f3','RS-485 comms','shielded twisted pair, 120Ω','24 AWG (Belden 3105A)'],
+    ['#43d17a','Ground / bond','green THHN','14 AWG (per 250.122)'],
+    ['#26c6da','Ethernet / PoE','Cat6','23 AWG solid'],
+    ['#fb8c00','Relay outputs','MTW / contactor coil','16 AWG'],
+    ['#cbb27a','Fire-alarm contact','FPLR (dry contact)','18 AWG']
+  ];
+  var rows=spec.map(function(r){
+    return '<div class="specrow"><span class="sw" style="color:'+r[0]+'"></span>'+
+      '<div class="specnm">'+r[1]+'</div><div class="spectp">'+r[2]+'</div><div class="specaw">'+r[3]+'</div></div>';
+  }).join('');
+  layEl.innerHTML='<div class="lhdr"><div class="ltitle">Wiring layers</div>'+
+    '<button class="lall" id="layAll">All</button></div><div class="lchips">'+chips+'</div>'+
+    '<div class="legttl">Wire schedule — type &amp; size</div><div class="legbox">'+rows+'</div>';
+  layEl.querySelectorAll('.lchip').forEach(function(c){ c.onclick=function(){ var k=c.dataset.k;
+    SYS[k].visible=!SYS[k].visible; c.classList.toggle('on',SYS[k].visible); }; });
+  var allOn=false;
+  document.getElementById('layAll').onclick=function(){ allOn=!allOn;
+    Object.keys(SYS).forEach(function(k){ SYS[k].visible=allOn; });
+    layEl.querySelectorAll('.lchip').forEach(function(c){ c.classList.toggle('on',allOn); });
+    this.textContent=allOn?'None':'All'; };
+})();
+var layOpen=false;
+layersBtn.onclick=function(){ layOpen=!layOpen; layEl.classList.toggle('show',layOpen);
+  layersBtn.classList.toggle('on',layOpen); hideHint(); };
+document.getElementById('resetBtn').onclick=function(){
+  sph.radius=70; sph.theta=0.62; sph.phi=1.18; animTarget=new THREE.Vector3(0,1,-6); clearSel(); hideInfo(); };
+
+/* ---------------- Hint ---------------- */
+var hintEl=document.getElementById('hint'),hintGone=false;
+function hideHint(){ if(!hintGone){ hintGone=true; hintEl.style.opacity=0;
+  setTimeout(function(){ hintEl.style.display='none'; },600); } }
+setTimeout(hideHint,6500);
+
+/* ---------------- Animate ---------------- */
+var animTarget=new THREE.Vector3(0,1,-6), lastT=performance.now();
+function loop(){
+  requestAnimationFrame(loop);
+  var now=performance.now(), dt=now-lastT; lastT=now;
+  doorCurrent+=(doorTarget-doorCurrent)*0.12; doorPivot.rotation.y=doorCurrent;
+  for(var c=0;c<coolingBlades.length;c++){ coolingBlades[c].rotation.y+=0.35; }
+  for(var i=0;i<farmFans.length;i++){ var f=farmFans[i];
+    var tgt=(f.on&&!f.fault&&!fireAlarm)?f.cmd/100*MAXRPM:0;
+    f.rpm+=(tgt-f.rpm)*0.04; farmBlades[i].rotation.y+=f.rpm*0.00045*dt;
+    var glow=(i===pollIdx&&(f.on||f.fault)&&!fireAlarm);
+    driveMeshes[i].material.emissive=new THREE.Color(f.fault?0xff4d4f:(glow?0x43d17a:0x000000));
+    driveMeshes[i].material.emissiveIntensity=f.fault?0.55:(glow?0.6:0);
+  }
+  pollAcc+=dt; if(pollAcc>250){ pollAcc=0; pollIdx=(pollIdx+1)%farmFans.length; }
+  refreshAcc+=dt; if(refreshAcc>120){ refreshAcc=0; refreshDash(); }
+  target.lerp(animTarget,0.08); applyCam();
+  renderer.render(scene,camera);
+}
+loop();
+
+window.addEventListener('resize',function(){ W=window.innerWidth; H=window.innerHeight;
+  camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H); });
+setTimeout(function(){ var l=document.getElementById('loader'); l.style.transition='opacity .4s';
+  l.style.opacity=0; setTimeout(function(){ l.style.display='none'; },400); },400);
+
+})();
+</script>
+</body>
+</html>
