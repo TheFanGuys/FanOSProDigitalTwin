@@ -29,6 +29,10 @@
   /* Header / brand */
   #hdr{position:fixed;top:0;left:0;right:0;padding:12px 14px;display:flex;align-items:center;
     gap:10px;z-index:5;pointer-events:none;}
+  #sysBadge{margin-left:auto;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.6px;
+    padding:4px 10px;border:1px solid #2b3a4a;border-radius:7px;color:#7fb2d8;background:rgba(8,18,28,.55);pointer-events:none;}
+  #dash{border-left:3px solid rgba(33,150,243,.45);}
+  .dbtn{font-variant-numeric:tabular-nums;} .pill{letter-spacing:.3px;}
   #hdr svg{width:40px;height:40px;flex:0 0 auto;}
   #hdr .wm{line-height:1;}
   #hdr .wm .nm{font-size:17px;font-weight:800;letter-spacing:.2px;}
@@ -164,6 +168,7 @@
     <div class="nm"><b>FanOS</b><span class="badge">Pro</span></div>
     <div class="tag">Air Movement Control</div>
   </div>
+  <div id="sysBadge">READY</div>
 </header>
 
 <div id="spec">
@@ -194,6 +199,17 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// Surface any startup error onto the loader screen (so it's readable without dev tools).
+window.addEventListener('error', function(e){
+  var p = document.querySelector('#loader p'), L = document.getElementById('loader');
+  if(L){ L.style.display='flex'; L.style.opacity=1; }
+  if(p){ p.style.color='#ff6b6b'; p.style.fontSize='12px'; p.style.lineHeight='1.4';
+    p.style.padding='0 22px'; p.style.textAlign='center'; p.style.maxWidth='90vw';
+    p.textContent = 'Load error: ' + (e.message||'unknown') + '  [line ' + (e.lineno||'?') + ']'; }
+});
+if (typeof THREE === 'undefined') {
+  throw new Error('Three.js failed to load — the 3D library was blocked or no internet');
+}
 (function(){
 "use strict";
 
@@ -221,8 +237,8 @@ var DATA = {
     desc:"One terminal block per port, each with biasing + end-of-line termination. Up to 50 devices total across both chains."},
   firealarm:{tag:"Life-safety", name:"Fire-alarm interlock terminal",
     desc:"Dry contact in to GPIO27. FanOS Pro SEES the alarm, stops fans in software, and annunciates. It does NOT replace the hardwired life-safety shutdown the fire-alarm contractor lands per code."},
-  glands:{tag:"Field entry", name:"Cable glands",
-    desc:"Field-wiring entry at the bottom — power in, the two comms chains, and the network drop."},
+  glands:{tag:"Field entry", name:"Conduit fittings (½\" & ¾\")",
+    desc:"No random holes — field wiring lands at proper fittings sized per circuit. ¾\" hub for the AC power + ground (line in). Separate ½\" hubs for each RS-485 chain, the relay outputs, the fire-alarm interlock, and the Ethernet/PoE drop. Low-voltage comms kept in their own fittings, away from power."},
   cooling:{tag:"Thermal", name:"Cabinet cooling",
     desc:"Filtered intake + roof exhaust to keep the electronics cool. (Added per your earlier note.)"},
   vfd:{tag:"Field · VFD", name:"Fan drive (VFD)",
@@ -402,6 +418,30 @@ cabinet.add(place(box(1.4,3.0,1.6,M.brkT,'breaker'),-3.0,-3.0,compZ)); // SPD
 // ground/bond bar (copper)
 cabinet.add(place(box(9,0.5,0.6,M.copper,'ground'),-2,-5.6,compZ));
 
+/* ---------------- Cabinet indicator lights ---------------- */
+var cabLeds=[];
+function led(x,y,z,color,mode){
+  var mat=new THREE.MeshStandardMaterial({color:0x0c0f12,emissive:new THREE.Color(color),emissiveIntensity:0,roughness:0.35,metalness:0});
+  var m=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.05,8),mat);
+  m.rotation.x=Math.PI/2; m.position.set(x,y,z); cabinet.add(m);
+  cabLeds.push({mat:mat,mode:mode,ph:Math.random()*6.283});
+}
+// AAEON: power (solid), heartbeat, and RS-485 TX/RX activity
+led(-5.85,8.3,railZ+2.62,0x33d17a,'pwr');
+led(-5.55,8.3,railZ+2.62,0x33d17a,'blink');
+led(-3.0,7.55,railZ+2.62,0xffb300,'tx');
+led(-2.5,7.55,railZ+2.62,0x2196f3,'rx');
+// Ethernet switch link/activity
+led(-1.0,7.55,compZ+1.45,0x33d17a,'act'); led(-0.6,7.55,compZ+1.45,0x33d17a,'act'); led(-0.2,7.55,compZ+1.45,0x33d17a,'act');
+// PoE switch link/activity
+led(2.7,8.05,compZ+1.55,0xffb300,'act'); led(3.4,8.05,compZ+1.55,0x33d17a,'act'); led(4.1,8.05,compZ+1.55,0x33d17a,'act');
+// power supplies DC-OK
+led(-5.4,3.35,compZ+1.15,0x33d17a,'pwr'); led(-4.2,3.35,compZ+1.15,0x33d17a,'pwr');
+// relay channel indicators
+for(var rl=0;rl<4;rl++) led(-1.5+rl*0.7,2.55,compZ+0.78,0xffb300,'relay');
+// SPD "protected"
+led(-3.0,-1.65,compZ+0.85,0x33d17a,'pwr');
+
 // terminal blocks at the bottom rail
 function termGroup(n,topMat,key,x,y,sp){
   var g=new THREE.Group();
@@ -415,14 +455,26 @@ termGroup(3,M.termG,'acterm',-2.6,-7.0,0.4);   // AC L/N/G
 termGroup(2,M.fire,'firealarm',-0.6,-7.0,0.4); // fire-alarm dry contact
 termGroup(4,M.relayT,'relay',1.2,-7.0,0.4);    // relay outputs
 
-// labeled conduit entries (bottom): supply / comms A / comms B / ethernet / relay
-var gxs=[-5,-3,-1,1,3];
-gxs.forEach(function(gx){
-  var gl=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,1.2,18),M.gland);
-  gl.castShadow=true; gl.userData.key='glands'; selectable.push(gl);
-  (partRefs.glands=partRefs.glands||[]).push(gl);
-  gl.position.set(gx,-EH/2-0.3,0); cabinet.add(gl);
-});
+// ---- field conduit entries: properly-sized fittings under each terminal group ----
+// ¾" for AC power+ground; ½" for each low-voltage/control circuit. Grouped, no random holes.
+M.conduit = mat(0x9aa3ab,{r:0.5,m:0.85,ei:0.9});                 // galvanized EMT / connector
+function fitting(x, trade){
+  var br = trade>=0.75 ? 0.62 : 0.48;                            // hub body radius (¾" vs ½")
+  var cr = trade>=0.75 ? 0.46 : 0.34;                            // conduit radius
+  var g=new THREE.Group(); g.position.set(x,0,0);
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(br,br,1.0,18),M.gland),0,-EH/2,0));                 // hub through wall
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(br+0.18,br+0.18,0.16,6),M.conduit),0,-EH/2+0.5,0)); // locknut (hex), inside
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(br+0.04,br+0.04,0.2,16),M.conduit),0,-EH/2-0.55,0));// connector shoulder, outside
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(cr,cr,1.3,14),M.conduit),0,-EH/2-1.35,0));          // conduit nipple down
+  g.traverse(function(c){ if(c.isMesh){ c.castShadow=true; c.userData.key='glands'; selectable.push(c); (partRefs.glands=partRefs.glands||[]).push(c);} });
+  cabinet.add(g);
+}
+fitting(-6.0,0.5);   // RS-485 chain A
+fitting(-4.4,0.5);   // RS-485 chain B
+fitting(-2.6,0.75);  // AC power + ground
+fitting(-0.6,0.5);   // fire-alarm interlock
+fitting( 1.2,0.5);   // relay outputs
+fitting( 3.2,0.5);   // Ethernet / PoE
 
 /* ---------------- Cabinet cooling — SIDE mounted (cross-flow) ---------------- */
 var coolingBlades=[];
@@ -492,23 +544,64 @@ function tube(p1,p2,material,rad){
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.clone().normalize());
   return m;
 }
+// ---- Phase 4 field materials ----
+M.ltflex = mat(0x14181d,{r:0.78,m:0.2,ei:0.3});   // liquid-tight flexible conduit
+M.strut  = mat(0x8b929a,{r:0.5,m:0.8,ei:0.85});   // galvanized Unistrut
+M.steel  = mat(0x3a4048,{r:0.55,m:0.7,ei:0.6});   // ceiling steel
+M.deck   = mat(0x222831,{r:0.82,m:0.3,ei:0.3});   // roof deck
+
 function makeVFD(){
   var g=new THREE.Group();
-  g.add(box(2.0,3.0,1.6,M.vfdBody,'vfd'));
-  var face=place(box(1.3,1.6,0.1,M.vfdFace,'vfd'),0,0.3,0.85); g.add(face);
-  g.add(place(box(1.0,0.4,0.06,M.vfdT,'vfd'),0,0.7,0.92));
+  g.add(box(2.0,3.0,1.6,M.vfdBody,'vfd'));                                  // body — children[0] (tap + fault glow)
+  for(var hf=0;hf<5;hf++) g.add(place(box(1.8,0.45,0.07,M.rail,'vfd'),0,1.55,-0.55+hf*0.24)); // heatsink fins (top)
+  g.add(place(box(1.55,2.5,0.12,M.vfdFace,'vfd'),0,-0.15,0.8));             // recessed face
+  g.add(place(box(1.1,0.66,0.06,M.screen,'vfd'),0,0.6,0.9));                // display window
+  var dg=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.5),new THREE.MeshBasicMaterial({color:0x123b2a,toneMapped:false}));
+  dg.position.set(0,0.6,0.94); g.add(dg);                                   // display glow
+  for(var r=0;r<2;r++)for(var c2=0;c2<3;c2++) g.add(place(box(0.22,0.18,0.06,M.disc,'vfd'),-0.3+c2*0.3,-0.32-r*0.3,0.9)); // keypad
+  var runMat=new THREE.MeshStandardMaterial({color:0x0e2a18,emissive:0x000000,roughness:0.4,metalness:0});
+  var fltMat=new THREE.MeshStandardMaterial({color:0x2a0e0e,emissive:0x000000,roughness:0.4,metalness:0});
+  var runLed=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.05,10),runMat); runLed.rotation.x=Math.PI/2; runLed.position.set(0.4,1.05,0.92);
+  var fltLed=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.05,10),fltMat); fltLed.rotation.x=Math.PI/2; fltLed.position.set(0.64,1.05,0.92);
+  g.add(runLed); g.add(fltLed);                                            // status LEDs (not selectable)
+  for(var s=0;s<4;s++) g.add(place(box(1.2,0.05,0.04,M.vfdFace,'vfd'),0,-1.0-s*0.13,0.9)); // cooling vents
+  g.add(place(box(1.0,0.4,0.04,M.psu,'vfd'),0,-1.62,0.9));                  // brand-neutral label
+  g.add(place(box(0.5,0.4,0.3,M.termB,'vfd'),0.9,-1.0,0.4));                // RS-485 terminal landing
+  [[-0.85,1.35],[0.85,1.35],[-0.85,-1.35],[0.85,-1.35]].forEach(function(p){
+    var sc=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.12,6),M.rail); sc.rotation.x=Math.PI/2; sc.position.set(p[0],p[1],0.86); g.add(sc); }); // screws
+  return {group:g, leds:{run:runLed, flt:fltLed}};
+}
+function makeDisconnect(){
+  var g=new THREE.Group();
+  g.add(box(1.5,2.2,1.1,M.disc,'disconnect'));                             // body
+  g.add(place(box(0.7,0.5,0.04,M.psu,'disconnect'),0,0.5,0.58));           // ON/OFF plate
+  var hb=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.3,12),M.rail); hb.rotation.z=Math.PI/2; hb.position.set(0.85,-0.2,0.3); g.add(hb);
+  g.add(place(box(0.55,0.18,0.18,M.brk,'disconnect'),1.15,-0.2,0.3));      // handle lever
+  var hubT=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.4,12),M.conduit); hubT.position.set(0,1.2,0); g.add(hubT);
+  var hubB=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.4,12),M.conduit); hubB.position.set(0,-1.2,0); g.add(hubB); // conduit hubs
+  [[-0.6,0.95],[0.6,0.95],[-0.6,-0.95],[0.6,-0.95]].forEach(function(p){
+    var sc=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.1,6),M.rail); sc.rotation.x=Math.PI/2; sc.position.set(p[0],p[1],0.56); g.add(sc); });
   return g;
 }
 function makeHVLS(d){
   var g=new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.9,1.4,16),M.hvlsHub));
-  var cap=new THREE.Mesh(new THREE.CylinderGeometry(1.3,0.9,0.6,16),M.hvlsHub); cap.position.y=0.9; g.add(cap);
-  var rod=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,4,10),M.motor); rod.position.y=2.6; g.add(rod);
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,1.6,20),M.hvlsHub));                 // motor housing
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.05,0.5,20),M.hvlsHub),0,1.0,0));  // top shroud
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.7,12),M.motor),0,1.55,0));   // downrod stub
+  g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.4,20),M.hvlsHub),0,-0.9,0));   // hub plate
+  for(var hb=0;hb<6;hb++){ var a=hb*Math.PI/3;
+    g.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,0.45,6),M.rail),Math.cos(a)*1.15,-0.9,Math.sin(a)*1.15)); } // hub bolts
   var blades=new THREE.Group();
-  for(var b=0;b<6;b++){ var v=new THREE.Mesh(new THREE.BoxGeometry(d,0.16,1.0),M.hvlsBlade);
-    v.position.x=d/2+0.5; v.castShadow=true; var h=new THREE.Group(); h.add(v);
-    h.rotation.y=b*(Math.PI/3); blades.add(h); }
-  g.add(blades); return {group:g, blades:blades};
+  for(var b=0;b<6;b++){ var arm=new THREE.Group(); arm.rotation.y=b*(Math.PI/3);
+    arm.add(place(new THREE.Mesh(new THREE.BoxGeometry(1.1,0.28,0.55),M.rail),1.05,-0.9,0));     // blade bracket
+    var blade=new THREE.Mesh(new THREE.BoxGeometry(d,0.13,1.15),M.hvlsBlade);                    // airfoil blade
+    blade.position.set(d/2+1.5,-0.92,0); blade.rotation.x=0.14; blade.castShadow=true; arm.add(blade); // slight pitch
+    var cap=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.34,1.15),M.hvlsHub);                     // winglet end cap
+    cap.position.set(d+1.5,-0.92,0); cap.rotation.x=0.14; arm.add(cap);
+    blades.add(arm); }
+  g.add(blades);
+  g.traverse(function(c){ if(c.isMesh){ c.userData.key='fan'; selectable.push(c); (partRefs.fan=partRefs.fan||[]).push(c);} });
+  return {group:g, blades:blades};
 }
 
 // fans placed away; each VFD sits directly under its fan (clean vertical motor lead)
@@ -520,7 +613,7 @@ var farmFans=[
   {name:'Fan 3', zone:'B', chain:1, on:false, cmd:45, rpm:0, fault:false,
      vfd:new THREE.Vector3(20,-2,-3), fan:new THREE.Vector3(20,11,-3)}
 ];
-var MAXRPM=150, farmBlades=[], driveMeshes=[];
+var MAXRPM=150, farmBlades=[], driveMeshes=[], vfdLeds=[];
 var field=new THREE.Group(); scene.add(field);
 
 // ---- wiring split into toggleable system layers ----
@@ -536,37 +629,70 @@ function runPath(points,material,rad,group){
 }
 var z0=compZ, yT=-9.5;
 
-// ---- field devices + their power/ground ----
+// ---- field devices: each fan as a real installation (rack, drive, disconnect, conduit) ----
+var ceilY=20, floorY=-9.5;
 farmFans.forEach(function(f,i){
-  var v=makeVFD(); v.position.copy(f.vfd); field.add(v);
-  var body=v.children[0]; body.userData.idx=i; driveMeshes.push(body); body.material=M.vfdBody.clone();
+  var rackZ=f.vfd.z-0.95, xD=f.vfd.x-2.4;                    // disconnect x
+  // Unistrut drive rack to the floor (nothing floats)
+  [xD-0.7, f.vfd.x+0.9].forEach(function(px){
+    field.add(place(box(0.3,(f.vfd.y+2.6)-floorY,0.3,M.strut), px, (f.vfd.y+2.6+floorY)/2, rackZ)); });
+  [f.vfd.y+1.8,f.vfd.y-1.9].forEach(function(py){
+    field.add(place(box((f.vfd.x+0.9)-(xD-0.7),0.25,0.3,M.strut), ((xD-0.7)+(f.vfd.x+0.9))/2, py, rackZ)); });
+  // building-feed J-box on top of the rack
+  field.add(place(box(1.2,0.8,0.8,M.disc), xD, f.vfd.y+2.5, rackZ+0.3));
+
+  // VFD (keep children[0] for tap + fault glow)
+  var vd=makeVFD(); var vg=vd.group; vg.position.copy(f.vfd); field.add(vg);
+  var body=vg.children[0]; body.userData.idx=i; driveMeshes.push(body); body.material=M.vfdBody.clone();
+  vfdLeds.push(vd.leds);
+
+  // HVLS fan head
   var hv=makeHVLS(5.6); hv.group.position.copy(f.fan); field.add(hv.group);
   farmBlades.push(hv.blades);
-  hv.group.children.forEach(function(ch){ if(ch.geometry){ ch.userData.key='fan'; selectable.push(ch);
-    (partRefs.fan=partRefs.fan||[]).push(ch); } });
-  var d=box(1.4,2.0,1.0,M.disc,'disconnect'); d.position.set(f.vfd.x-2.4,f.vfd.y,f.vfd.z); field.add(d);
-  runPath([V(f.vfd.x-2.4,yT,f.vfd.z),V(f.vfd.x-2.4,f.vfd.y-1.0,f.vfd.z)],M.wireBk,0.09,SYS.power);
-  runPath([V(f.vfd.x-2.4,f.vfd.y+1.0,f.vfd.z),V(f.vfd.x-2.4,f.vfd.y+1.4,f.vfd.z),V(f.vfd.x-1.0,f.vfd.y+1.4,f.vfd.z),V(f.vfd.x-1.0,f.vfd.y+1.5,f.vfd.z)],M.wireBk,0.08,SYS.power);
-  SYS.power.add(tube(V(f.vfd.x,f.vfd.y+1.6,f.vfd.z), V(f.fan.x,f.fan.y-1.0,f.fan.z), M.motor, 0.16));
-  runPath([V(f.vfd.x+0.9,f.vfd.y-1.4,f.vfd.z),V(f.vfd.x+0.9,yT,f.vfd.z)],M.wireG,0.07,SYS.ground);
+
+  // disconnect beside the VFD, on the rack
+  var dc=makeDisconnect(); dc.position.set(xD,f.vfd.y,f.vfd.z); field.add(dc);
+
+  // LINE POWER (kept separate from comms): EMT feed -> disconnect -> liquid-tight -> VFD -> motor cable -> fan
+  SYS.power.add(tube(V(xD,f.vfd.y+2.3,rackZ+0.3), V(xD,f.vfd.y+1.45,f.vfd.z), M.conduit,0.26));            // EMT building feed
+  runPath([V(xD,f.vfd.y-1.45,f.vfd.z),V(xD,f.vfd.y-2.1,f.vfd.z),V(f.vfd.x-0.4,f.vfd.y-2.1,f.vfd.z),V(f.vfd.x-0.4,f.vfd.y-1.55,f.vfd.z)],M.ltflex,0.2,SYS.power); // liquid-tight to VFD
+  runPath([V(f.vfd.x+0.4,f.vfd.y+1.55,f.vfd.z),V(f.vfd.x+0.4,f.fan.y-1.3,f.fan.z)],M.ltflex,0.18,SYS.power); // motor cable up to fan
+  SYS.power.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.25,12),M.conduit), f.vfd.x+0.4,f.fan.y-1.4,f.fan.z)); // motor connector
+
+  // RS-485 COMMS: short drop from the trunk into a gland + terminal on the VFD
+  field.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.45,10),M.gland), f.vfd.x+0.9,-2.9,f.vfd.z+0.45)); // strain relief
+  runPath([V(f.vfd.x,-3.5,f.vfd.z),V(f.vfd.x+0.9,-3.0,f.vfd.z+0.45),V(f.vfd.x+0.9,-2.2,f.vfd.z+0.45)],M.wireB,0.06,SYS.comms);
+
+  // FAN SUPPORT to the ceiling (downrod sized per fan height + safety cable + guy wires)
+  field.add(tube(V(f.fan.x,f.fan.y+1.6,f.fan.z), V(f.fan.x,ceilY,f.fan.z), M.motor,0.16));     // downrod
+  field.add(place(box(2.4,0.3,2.4,M.steel), f.fan.x, ceilY, f.fan.z));                          // ceiling mount plate
+  field.add(place(box(0.4,0.45,4.2,M.strut), f.fan.x, ceilY-0.25, f.fan.z));                    // mount channel to joist
+  field.add(tube(V(f.fan.x+0.8,f.fan.y+1.2,f.fan.z+0.8), V(f.fan.x,ceilY-0.2,f.fan.z), M.rail,0.05)); // safety cable
+  [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(g){
+    field.add(tube(V(f.fan.x+g[0]*0.95,f.fan.y+0.9,f.fan.z+g[1]*0.95), V(f.fan.x,ceilY-0.3,f.fan.z), M.rail,0.03)); }); // guy wires
 });
 
-// ---- COMMS: two RS-485 chains, floor tray, 90° ----
-runPath([V(-3,-10.3,0),V(-3,yT,0),V(-3,yT,-6),V(-22,yT,-6),V(0,yT,-6),V(0,yT,-22)],M.wireB,0.1,SYS.comms);
+// ---- warehouse ceiling (subtle; cabinet stays the focus) ----
+[-14,2,18].forEach(function(bx){ field.add(place(box(1.0,1.4,64,M.steel), bx, ceilY+0.9, -10)); });   // I-beams (run in z)
+for(var jz=-28; jz<=8; jz+=6) field.add(place(box(56,0.5,0.5,M.steel), 2, ceilY+0.3, jz));             // bar joists (run in x)
+for(var dz=-28; dz<=8; dz+=3) field.add(place(box(56,0.22,0.4,M.deck), 2, ceilY+1.45, dz));            // roof deck ribs
+
+// ---- COMMS: RS-485 chain A leaves the ½" fitting at x=-6.0, chain B at x=-4.4 ----
+runPath([V(-6.0,-10.3,0),V(-6.0,yT,0),V(-6.0,yT,-6),V(-22,yT,-6),V(0,yT,-6),V(0,yT,-22)],M.wireB,0.1,SYS.comms);
 runPath([V(-22,yT,-6),V(-22,-3.5,-6)],M.wireB,0.1,SYS.comms);
 runPath([V(0,yT,-22),V(0,-3.5,-22)],M.wireB,0.1,SYS.comms);
-runPath([V(-1,-10.3,0),V(-1,yT,0),V(-1,yT,-3),V(20,yT,-3)],M.wireB,0.1,SYS.comms);
+runPath([V(-4.4,-10.3,0),V(-4.4,yT,0),V(-4.4,yT,-3),V(20,yT,-3)],M.wireB,0.1,SYS.comms);
 runPath([V(20,yT,-3),V(20,-3.5,-3)],M.wireB,0.1,SYS.comms);
-// internal RS-485 + fire: short stubs into wireway (long runs hidden in duct)
-runPath([V(-5.6,-6.4,z0),V(-5.6,-8.0,z0)],M.wireB,0.06,SYS.comms);
-runPath([V(-4.0,-6.4,z0),V(-4.0,-8.0,z0)],M.wireB,0.06,SYS.comms);
+// internal: each RS-485 terminal + fire drops down its own fitting
+runPath([V(-6.0,-6.4,z0),V(-6.0,-9.4,z0)],M.wireB,0.06,SYS.comms);
+runPath([V(-4.4,-6.4,z0),V(-4.4,-9.4,z0)],M.wireB,0.06,SYS.comms);
 runPath([V(-3.0,7.1,z0),V(-3.0,8.3,z0)],M.wireB,0.06,SYS.comms);
 runPath([V(-2.5,7.1,z0),V(-2.5,8.3,z0)],M.wireB,0.06,SYS.comms);
-runPath([V(-0.6,-6.4,z0),V(-0.6,-8.0,z0)],M.wireG,0.06,SYS.comms);
+runPath([V(-0.6,-6.4,z0),V(-0.6,-9.4,z0)],M.wireG,0.06,SYS.comms);
 
-// ---- POWER (internal): short stubs at gland / breakers / supplies ----
-runPath([V(-5,-10.3,0),V(-5,-8.8,0)],M.wireBk,0.1,SYS.power);
-runPath([V(-5.3,-10.3,0),V(-5.3,-8.8,0)],M.wireW,0.09,SYS.power);
+// ---- POWER: incoming AC (L/N) lands at the ¾" fitting under the AC terminal ----
+runPath([V(-2.75,-10.3,0),V(-2.75,-8.4,0)],M.wireBk,0.1,SYS.power);   // line
+runPath([V(-2.6,-10.3,0),V(-2.6,-8.4,0)],M.wireW,0.09,SYS.power);     // neutral
 runPath([V(-4.5,-1.5,z0),V(-4.5,-0.6,z0)],M.wireBk,0.08,SYS.power);
 runPath([V(-5.4,0.1,z0),V(-5.4,-0.6,z0)],M.wireBk,0.08,SYS.power);
 runPath([V(-4.2,0.1,z0),V(-4.2,-0.6,z0)],M.wireBk,0.08,SYS.power);
@@ -580,28 +706,117 @@ runPath([V(-0.4,2.9,z0),V(-0.4,3.75,z0)],M.wireR,0.06,SYS.dc);
 
 // ---- GROUND: short bonds to the bar (ring terminals added below) ----
 [-5,-3.2,-1,1,2.5].forEach(function(gx){ runPath([V(gx,-4.9,z0),V(gx,-5.35,z0)],M.wireG,0.06,SYS.ground); });
-runPath([V(-4.7,-10.3,0),V(-4.7,-8.8,0)],M.wireG,0.07,SYS.ground);
+runPath([V(-2.45,-10.3,0),V(-2.45,-8.4,0)],M.wireG,0.07,SYS.ground);  // incoming EGC at the ¾" power hub
 
 // ---- ETHERNET: short stubs at AAEON + switches ----
 runPath([V(-3.6,7.0,z0),V(-3.6,8.0,z0)],M.wireC,0.06,SYS.ethernet);
 runPath([V(-0.6,7.95,z0),V(-0.6,8.4,z0)],M.wireC,0.06,SYS.ethernet);
 runPath([V(3.4,8.45,z0),V(3.4,8.8,z0)],M.wireC,0.06,SYS.ethernet);
 
-// touchscreen in the field + PoE Cat6 (field run)
-var stand=new THREE.Group();
-stand.add(place(box(0.5,12,0.5,M.disc),0,-4,0));
-var scr=box(7,4.2,0.5,M.screen,'screen'); scr.position.set(0,1.5,0); stand.add(scr);
-var scrFace=new THREE.Mesh(new THREE.PlaneGeometry(6.3,3.5),new THREE.MeshBasicMaterial({color:0x103a5c,toneMapped:false}));
-scrFace.position.set(0,1.5,0.27); stand.add(scrFace);
-stand.position.set(13,0,8); field.add(stand);
-runPath([V(1,-10.3,0),V(1,yT,0),V(1,yT,8),V(13,yT,8),V(13,-4,8),V(13,0.6,8)],M.wireC,0.07,SYS.ethernet);
+// ---- live HMI helpers (canvas textures, no external images) ----
+function makeHMI(wPx,hPx){ var c=document.createElement('canvas'); c.width=wPx; c.height=hPx;
+  var tex=new THREE.CanvasTexture(c); tex.anisotropy=4; tex.encoding=THREE.sRGBEncoding;
+  return {canvas:c, ctx:c.getContext('2d'), tex:tex}; }
+function smudgeTex(){ var c=document.createElement('canvas'); c.width=256; c.height=256; var x=c.getContext('2d');
+  for(var i=0;i<11;i++){ var gx=Math.random()*256, gy=Math.random()*256, gr=16+Math.random()*34;
+    var g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,'rgba(255,255,255,0.05)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(gx-gr,gy-gr,gr*2,gr*2); }
+  return new THREE.CanvasTexture(c); }
+var smudge=smudgeTex();
+function fitState(){ var fault=farmFans.some(function(f){return f.fault;}), on=farmFans.some(function(f){return f.on;});
+  if(fireAlarm) return ['FIRE','#ff4d4f']; if(fault) return ['FAULT','#ff4d4f']; if(on) return ['RUNNING','#43d17a']; return ['READY','#7fb2d8']; }
+function drawMasterHMI(h){ var x=h.ctx,W=h.canvas.width,H=h.canvas.height;
+  x.textAlign='left'; x.fillStyle='#06101b'; x.fillRect(0,0,W,H);
+  x.fillStyle='#0a1929'; x.fillRect(0,0,W,H*0.17);
+  x.fillStyle='#2196f3'; x.font='bold '+Math.round(H*0.08)+'px Arial'; x.textBaseline='middle'; x.fillText('FanOS Pro',W*0.04,H*0.07);
+  x.fillStyle='#6b8299'; x.font=Math.round(H*0.036)+'px Arial'; x.fillText('AIR MOVEMENT CONTROL',W*0.04,H*0.135);
+  var st=fitState(); x.fillStyle=st[1]; roundRect(x,W*0.73,H*0.032,W*0.23,H*0.1,6); x.fill();
+  x.fillStyle='#06101b'; x.font='bold '+Math.round(H*0.05)+'px Arial'; x.textAlign='center'; x.fillText(st[0],W*0.845,H*0.083); x.textAlign='left';
+  var ry=H*0.23, rh=H*0.205;
+  farmFans.forEach(function(f,i){ var yy=ry+i*rh;
+    x.fillStyle='#0e1b29'; roundRect(x,W*0.04,yy,W*0.92,rh*0.84,7); x.fill();
+    x.fillStyle='#cdd9e5'; x.font='bold '+Math.round(H*0.05)+'px Arial'; x.fillText(f.name+'  ·  Zone '+f.zone,W*0.075,yy+rh*0.28);
+    x.fillStyle=f.fault?'#ff4d4f':((f.on&&!fireAlarm)?'#43d17a':'#41526b'); x.beginPath(); x.arc(W*0.9,yy+rh*0.3,H*0.022,0,6.3); x.fill();
+    var pct=(f.on&&!f.fault&&!fireAlarm)?f.rpm/MAXRPM:0;
+    x.fillStyle='#13283c'; roundRect(x,W*0.075,yy+rh*0.46,W*0.85,rh*0.17,4); x.fill();
+    x.fillStyle=f.fault?'#ff4d4f':'#2196f3'; roundRect(x,W*0.075,yy+rh*0.46,W*0.85*Math.max(0.02,pct),rh*0.17,4); x.fill();
+    x.fillStyle='#6b8299'; x.font=Math.round(H*0.033)+'px Arial'; x.fillText((f.on&&!fireAlarm?'RUN':'OFF')+' · '+Math.round(f.rpm)+' rpm',W*0.075,yy+rh*0.745); });
+  if(fireAlarm){ x.fillStyle='rgba(220,32,40,0.92)'; x.fillRect(0,H*0.9,W,H*0.1);
+    x.fillStyle='#fff'; x.font='bold '+Math.round(H*0.045)+'px Arial'; x.textAlign='center'; x.fillText('FIRE INTERLOCK ACTIVE — MONITORING ONLY',W*0.5,H*0.951); x.textAlign='left'; }
+  h.tex.needsUpdate=true; }
+function drawDoorHMI(h){ var x=h.ctx,W=h.canvas.width,H=h.canvas.height;
+  x.textAlign='center'; x.fillStyle='#06101b'; x.fillRect(0,0,W,H);
+  x.fillStyle='#2196f3'; x.font='bold '+Math.round(H*0.12)+'px Arial'; x.textBaseline='middle'; x.fillText('FanOS Pro',W/2,H*0.13);
+  x.fillStyle='#6b8299'; x.font=Math.round(H*0.05)+'px Arial'; x.fillText('LOCAL HMI · 7"',W/2,H*0.225);
+  var fault=farmFans.some(function(f){return f.fault;}), on=farmFans.some(function(f){return f.on;});
+  x.fillStyle=fireAlarm?'#5a1a1d':(fault?'#5a1a1d':(on?'#15402a':'#123f5c')); roundRect(x,W*0.12,H*0.34,W*0.76,H*0.27,14); x.fill();
+  x.fillStyle=fireAlarm?'#ff9a9a':(fault?'#ff9a9a':(on?'#43d17a':'#7fd0ff')); x.font='bold '+Math.round(H*0.092)+'px Arial';
+  x.fillText(fireAlarm?'INTERLOCK':(fault?'FAULT':(on?'SYSTEM RUNNING':'START SYSTEM')),W/2,H*0.475);
+  var running=farmFans.filter(function(f){return f.on&&!f.fault&&!fireAlarm;}).length;
+  x.fillStyle='#9fb2c4'; x.font=Math.round(H*0.05)+'px Arial'; x.fillText(running+' / '+farmFans.length+' fans running',W/2,H*0.71);
+  x.fillStyle='#3a5167'; x.font=Math.round(H*0.042)+'px Arial'; x.fillText('RS-485 polling · node '+(pollIdx+1),W/2,H*0.85);
+  x.textAlign='left'; h.tex.needsUpdate=true; }
+function glassPlane(w,h,z,col,op){ return place(new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,toneMapped:false})),0,0,z); }
+
+// ---- 27" master touchscreen on a wall arm ----
+var masterHMI=makeHMI(680,420); drawMasterHMI(masterHMI);
+var tsg=new THREE.Group();
+tsg.add(place(box(1.5,1.5,0.4,M.disc),0,-3.4,-0.7));            // wall plate
+tsg.add(place(box(0.35,3.2,0.35,M.rail),0,-1.9,-0.5));          // arm post
+tsg.add(place(box(2.4,0.32,0.32,M.rail),0,-0.2,-0.3));          // arm
+tsg.add(place(box(8.4,5.4,0.5,M.aaeon,'screen'),0,1.2,0));      // black bezel
+var msFace=new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.5),new THREE.MeshBasicMaterial({map:masterHMI.tex,toneMapped:false})); msFace.position.set(0,1.2,0.27); tsg.add(msFace);
+tsg.add(place(new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.5),new THREE.MeshBasicMaterial({map:smudge,transparent:true,opacity:0.5,toneMapped:false})),0,1.2,0.29));   // smudges
+tsg.add(place(new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.5),new THREE.MeshBasicMaterial({color:0xaecbe6,transparent:true,opacity:0.06,toneMapped:false})),0,1.2,0.30)); // glass sheen
+tsg.add(place(new THREE.Mesh(new THREE.PlaneGeometry(8.0,5.0),new THREE.MeshBasicMaterial({color:0x123a58,transparent:true,opacity:0.16,toneMapped:false})),0,1.2,0.16)); // glow
+tsg.position.set(13,1.6,8); tsg.rotation.y=-0.2; field.add(tsg);
+
+// ---- 7" PoE local HMI on the cabinet door (first-start / technician screen) ----
+var doorHMI=makeHMI(380,320); drawDoorHMI(doorHMI);
+var dpanel=new THREE.Group();
+dpanel.add(place(box(3.6,3.0,0.35,M.aaeon,'screen'),0,0,0));    // black bezel
+var dFace=new THREE.Mesh(new THREE.PlaneGeometry(3.1,2.6),new THREE.MeshBasicMaterial({map:doorHMI.tex,toneMapped:false})); dFace.position.set(0,0,0.2); dpanel.add(dFace);
+dpanel.add(place(new THREE.Mesh(new THREE.PlaneGeometry(3.1,2.6),new THREE.MeshBasicMaterial({map:smudge,transparent:true,opacity:0.4,toneMapped:false})),0,0,0.21));
+dpanel.add(place(new THREE.Mesh(new THREE.PlaneGeometry(3.1,2.6),new THREE.MeshBasicMaterial({color:0xaecbe6,transparent:true,opacity:0.05,toneMapped:false})),0,0,0.22));
+dpanel.add(place(new THREE.Mesh(new THREE.PlaneGeometry(3.5,2.9),new THREE.MeshBasicMaterial({color:0x123a58,transparent:true,opacity:0.14,toneMapped:false})),0,0,0.1));
+dpanel.add(place(box(0.5,0.3,0.25,M.poe),1.5,-1.35,0.0));       // PoE port (powered over Cat6)
+dpanel.position.set(EW/2-3.1,-4.4,WALL/2+0.25); doorPivot.add(dpanel);
+
+// ---- fire interlock glow at the fire-alarm terminal ----
+var fireGlow=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.4),new THREE.MeshBasicMaterial({color:0xff2b2b,transparent:true,opacity:0,toneMapped:false}));
+fireGlow.position.set(-0.6,-7.0,compZ+0.5); cabinet.add(fireGlow);
+
+// ---- data-flow pulses (parented to layer groups so they hide when a layer is hidden) ----
+var pulses=[], hmiAcc=0;
+function pointAt(P,frac){ var d=frac*P.total,k=0;
+  while(k<P.segs.length-1 && d>P.segs[k]){ d-=P.segs[k]; k++; }
+  var a=P.points[k],b=P.points[k+1],s=P.segs[k]||1,u=Math.min(1,d/s);
+  return new THREE.Vector3(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u,a.z+(b.z-a.z)*u); }
+function pulseTrail(points,group,color,count,speed){
+  var segs=[],total=0; for(var k=0;k<points.length-1;k++){ var L=points[k].distanceTo(points[k+1]); segs.push(L); total+=L; }
+  var mat=new THREE.MeshBasicMaterial({color:color,toneMapped:false}),meshes=[];
+  for(var c=0;c<count;c++){ var s=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,8),mat); group.add(s); meshes.push(s); }
+  pulses.push({points:points,segs:segs,total:total,meshes:meshes,speed:speed,off:Math.random(),count:count}); }
+pulseTrail([V(-6.0,yT,0),V(-6.0,yT,-6),V(-22,yT,-6),V(-22,-3.5,-6)],SYS.comms,0x35a7ff,2,0.16);
+pulseTrail([V(-6.0,yT,-6),V(0,yT,-6),V(0,yT,-22),V(0,-3.5,-22)],SYS.comms,0x35a7ff,2,0.14);
+pulseTrail([V(-4.4,yT,0),V(-4.4,yT,-3),V(20,yT,-3),V(20,-3.5,-3)],SYS.comms,0x35a7ff,2,0.13);
+pulseTrail([V(3.2,yT,0),V(3.2,yT,8),V(13,yT,8),V(13,-4,8)],SYS.ethernet,0x26c6da,2,0.15);
+pulseTrail([V(1.2,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],SYS.relay,0xffb300,2,0.12);
+pulseTrail([V(1.2,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],SYS.relay,0xffb300,2,0.12);
+runPath([V(3.2,-10.3,0),V(3.2,yT,0),V(3.2,yT,8),V(13,yT,8),V(13,-4,8),V(13,0.6,8)],M.wireC,0.07,SYS.ethernet);
+runPath([V(3.2,-8.4,z0),V(3.2,-9.4,z0)],M.wireC,0.06,SYS.ethernet); // Cat6 drops into its ½" fitting
 
 // ---- RELAY outputs: stub at module + field runs to on/off devices ----
 runPath([V(-0.4,0.1,z0),V(-0.4,-0.6,z0)],M.wireO,0.07,SYS.relay);
 var ex=box(3,3,1.6,M.eth,'exhaust'); ex.position.set(-13,7,-22); field.add(ex);
 var lv=box(3.2,2,1.2,M.disc,'louver'); lv.position.set(11,4,-22); field.add(lv);
-runPath([V(3,-10.3,0),V(3,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],M.wireO,0.06,SYS.relay);
-runPath([V(3,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],M.wireO,0.06,SYS.relay);
+runPath([V(1.2,-10.3,0),V(1.2,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],M.wireO,0.06,SYS.relay);
+runPath([V(1.2,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],M.wireO,0.06,SYS.relay);
+runPath([V(1.2,-8.4,z0),V(1.2,-9.4,z0)],M.wireO,0.06,SYS.relay); // relay output drops into its ½" fitting
+
+// ---- FIRE ALARM: dry-contact interlock out its own ½" fitting to the building FACP ----
+var facp=box(2.6,3.4,1.0,M.eth,'firealarm'); facp.position.set(6,2,-22); field.add(facp);
+runPath([V(-0.6,-10.3,0),V(-0.6,yT,0),V(6,yT,0),V(6,yT,-22),V(6,0.3,-22)],M.wireR,0.06,SYS.comms);
 
 /* ---------------- Phase 2: panel hardware (duct, ferrules, terminals, bonding) ---------------- */
 M.duct    = mat(0xc2c8cf,{r:0.85,m:0.0,ei:0.3});
@@ -649,13 +864,7 @@ fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(0.5,0.1,0.12),M.screw),-2.4,-6
 [-5,-3.2,-1,1,2.5].forEach(function(gx){
   var r=new THREE.Mesh(new THREE.TorusGeometry(0.13,0.05,6,12),M.ring); fx.add(place(r,gx,-5.35,compZ+0.3)); });
 
-// cable gland realism: locknuts + rubber grommets + a bottom tray
-[-5,-3,-1,1,3].forEach(function(gx){
-  fx.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,0.25,6),M.screw), gx,-EH/2+0.2,0));
-  var gr=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.12,6,14),M.ziptie); gr.rotation.x=Math.PI/2;
-  fx.add(place(gr,gx,-EH/2-0.35,0));
-});
-fx.add(place(new THREE.Mesh(new THREE.BoxGeometry(EW-2,0.8,1.4),M.disc),0,-EH/2-1.4,0));
+// (cable-entry hardware now handled by the sized conduit fittings built earlier)
 
 // door bonding strap (green/yellow, swings with the door)
 var strap=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.18,0.12),M.gystrap);
@@ -666,8 +875,8 @@ function ziptieAt(p,grp){ var z=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.05
   z.rotation.y=Math.PI/2; grp.add(place(z,p.x,p.y,p.z)); }
 [V(-12,yT,-6),V(-6,yT,-6),V(0,yT,-14),V(8,yT,-3)].forEach(function(p){ ziptieAt(p,SYS.comms); });
 ziptieAt(V(-22,4,-6),SYS.power); ziptieAt(V(20,4,-3),SYS.power);
-var loop=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.09,8,16,Math.PI*1.5),M.wireBk);
-loop.rotation.y=Math.PI/2; loop.position.set(-19.6,-1,-6); SYS.power.add(loop);
+var svcLoop=new THREE.Mesh(new THREE.TorusGeometry(0.55,0.09,8,16,Math.PI*1.5),M.wireBk);
+svcLoop.rotation.y=Math.PI/2; svcLoop.position.set(-19.6,-1,-6); SYS.power.add(svcLoop);
 
 /* ---------------- Orbit controls (mouse + touch) ---------------- */
 var target=new THREE.Vector3(0,1,-6);
@@ -869,8 +1078,31 @@ function loop(){
     var glow=(i===pollIdx&&(f.on||f.fault)&&!fireAlarm);
     driveMeshes[i].material.emissive=new THREE.Color(f.fault?0xff4d4f:(glow?0x43d17a:0x000000));
     driveMeshes[i].material.emissiveIntensity=f.fault?0.55:(glow?0.6:0);
+    var L=vfdLeds[i]; if(L){
+      var running=f.on&&!fireAlarm&&!f.fault;
+      L.run.material.emissive.setHex(running?0x2ecc71:0x000000);
+      L.run.material.emissiveIntensity=running?(0.55+0.45*Math.abs(Math.sin(now*0.006))):0.0;
+      L.flt.material.emissive.setHex(f.fault?0xff3b30:0x000000);
+      L.flt.material.emissiveIntensity=f.fault?(0.4+0.6*Math.abs(Math.sin(now*0.02))):0.0;
+    }
   }
   pollAcc+=dt; if(pollAcc>250){ pollAcc=0; pollIdx=(pollIdx+1)%farmFans.length; }
+  for(var q=0;q<cabLeds.length;q++){ var Ld=cabLeds[q], t=now*0.001+Ld.ph, v;
+    switch(Ld.mode){
+      case 'pwr':   v=0.75; break;
+      case 'blink': v=0.25+0.55*Math.abs(Math.sin(t*2.0)); break;
+      case 'act':   v=0.12+0.7*Math.abs(Math.sin(t*7.0+Math.sin(t*3.1))); break;
+      case 'tx':    v=(pollAcc<70)?0.95:0.1; break;
+      case 'rx':    v=(pollAcc>=70&&pollAcc<150)?0.95:0.1; break;
+      default:      v=0.18+0.5*Math.abs(Math.sin(t*1.3));
+    }
+    Ld.mat.emissiveIntensity=v;
+  }
+  fireGlow.material.opacity=fireAlarm?(0.20+0.16*Math.abs(Math.sin(now*0.004))):0;
+  for(var pz=0;pz<pulses.length;pz++){ var P=pulses[pz];
+    for(var pc=0;pc<P.count;pc++){ var fr=((now*0.001*P.speed)+P.off+pc/P.count)%1; P.meshes[pc].position.copy(pointAt(P,fr)); } }
+  hmiAcc+=dt; if(hmiAcc>340){ hmiAcc=0; drawMasterHMI(masterHMI); drawDoorHMI(doorHMI);
+    var sb=document.getElementById('sysBadge'); if(sb){ var s2=fitState(); sb.textContent=s2[0]; sb.style.color=s2[1]; sb.style.borderColor=s2[1]; } }
   refreshAcc+=dt; if(refreshAcc>120){ refreshAcc=0; refreshDash(); }
   target.lerp(animTarget,0.08); applyCam();
   renderer.render(scene,camera);
