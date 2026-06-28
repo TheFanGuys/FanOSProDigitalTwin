@@ -33,6 +33,19 @@
     padding:4px 10px;border:1px solid #2b3a4a;border-radius:7px;color:#7fb2d8;background:rgba(8,18,28,.55);pointer-events:none;}
   #dash{border-left:3px solid rgba(33,150,243,.45);}
   .dbtn{font-variant-numeric:tabular-nums;} .pill{letter-spacing:.3px;}
+  #iSpecs{margin-top:10px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12px;}
+  #iSpecs .k{color:var(--dim);} #iSpecs .v{color:var(--txt);text-align:right;font-variant-numeric:tabular-nums;}
+  #iSpecs .v.ok{color:var(--green);} #iSpecs .v.bad{color:#ff6b6b;} #iSpecs .v.warn{color:#ffd27a;}
+  #cam{position:fixed;left:0;right:0;bottom:150px;display:flex;gap:7px;overflow-x:auto;padding:0 14px;z-index:6;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  #cam::-webkit-scrollbar{display:none;}
+  .cchip{flex:0 0 auto;font-size:12px;font-weight:600;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:7px 13px;white-space:nowrap;cursor:pointer;}
+  .cchip:active{transform:scale(.96);} .cchip.active{border-color:var(--blue);color:var(--blue2);}
+  #diag{position:fixed;left:10px;right:10px;bottom:64px;z-index:8;display:none;max-height:62vh;overflow:auto;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:12px;max-width:560px;margin:0 auto;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+  #diag.show{display:block;}
+  #diag h3{font-size:13px;margin:0 0 10px;color:var(--txt);letter-spacing:.4px;}
+  .drow{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;}
+  .drow .k{color:var(--dim);} .drow .v{font-variant-numeric:tabular-nums;color:var(--txt);}
+  .drow .v.ok{color:var(--green);} .drow .v.bad{color:#ff6b6b;} .drow .v.warn{color:#ffd27a;}
   #hdr svg{width:40px;height:40px;flex:0 0 auto;}
   #hdr .wm{line-height:1;}
   #hdr .wm .nm{font-size:17px;font-weight:800;letter-spacing:.2px;}
@@ -183,6 +196,7 @@
     <button class="close" id="iClose" aria-label="Close">×</button></div>
   <h2 id="iName">—</h2>
   <p id="iDesc">—</p>
+  <div id="iSpecs"></div>
 </div>
 
 <div id="dash"></div>
@@ -190,10 +204,16 @@
 
 <div id="hint">Drag to orbit · pinch to zoom · tap any part</div>
 
+<div id="cam"></div>
+<div id="diag"></div>
+
 <div id="controls">
   <button class="btn primary" id="dashBtn">Dashboard</button>
+  <button class="btn" id="diagBtn">Diagnostics</button>
   <button class="btn" id="doorBtn">Open door</button>
   <button class="btn" id="layersBtn"><span class="dot"></span>Layers</button>
+  <button class="btn" id="xrayBtn">X-Ray</button>
+  <button class="btn" id="explodeBtn">Exploded</button>
   <button class="btn" id="resetBtn">Reset</button>
 </div>
 
@@ -253,8 +273,8 @@ var DATA = {
     desc:"Copper ground bar. Every component, the sub-panel, the enclosure, and the incoming ground all bond here. Green conductors tie it together."},
   screen:{tag:"Touchscreen", name:"27\" master touchscreen",
     desc:"PoE-powered. Runs the same FanOS Pro dashboard. One Cat6 from the cabinet's PoE switch carries data + power."},
-  exhaust:{tag:"On/off device", name:"Wall exhaust fan",
-    desc:"On/off, not on a VFD. Switched by the Waveshare relay module over a relay output."},
+  exhaust:{tag:"On/off device", name:"Roof exhaust fan · 3φ 240 V",
+    desc:"Large upblast roof exhauster on a roof curb, with its own 3-phase 240 V disconnect. It runs across the line — the Waveshare relay output only pilots the on/off (a motor starter switches the 3φ power), kept separate from the FanOS Pro comms."},
   louver:{tag:"On/off device", name:"Powered louver",
     desc:"On/off intake louver, also switched by a relay output from the module."},
   din:{tag:"Hardware", name:"DIN rail",
@@ -276,7 +296,7 @@ var scene=new THREE.Scene(); scene.background=new THREE.Color(0x0a1929);
 scene.fog=new THREE.Fog(0x0a1929, 130, 280);
 var camera=new THREE.PerspectiveCamera(44,W/H,0.1,2000);
 
-scene.add(new THREE.AmbientLight(0xffffff,0.32));
+var amb=new THREE.AmbientLight(0xffffff,0.32); scene.add(amb);
 var key=new THREE.DirectionalLight(0xffffff,1.15);
 key.position.set(28,46,34); key.castShadow=true;
 key.shadow.mapSize.width=2048; key.shadow.mapSize.height=2048;
@@ -606,14 +626,16 @@ function makeHVLS(d){
 
 // fans placed away; each VFD sits directly under its fan (clean vertical motor lead)
 var farmFans=[
-  {name:'Fan 1', zone:'A', chain:0, on:false, cmd:60, rpm:0, fault:false,
-     vfd:new THREE.Vector3(-22,-2,-6), fan:new THREE.Vector3(-22,12,-6)},
-  {name:'Fan 2', zone:'A', chain:0, on:false, cmd:80, rpm:0, fault:false,
-     vfd:new THREE.Vector3(0,-2,-22), fan:new THREE.Vector3(0,14,-22)},
-  {name:'Fan 3', zone:'B', chain:1, on:false, cmd:45, rpm:0, fault:false,
-     vfd:new THREE.Vector3(20,-2,-3), fan:new THREE.Vector3(20,11,-3)}
+  {name:'Fan A1', zone:'A', chain:0, on:false, cmd:60, rpm:0, fault:false,
+     vfd:new THREE.Vector3(-20,-2,-4), fan:new THREE.Vector3(-20,12,-4)},
+  {name:'Fan A2', zone:'A', chain:0, on:false, cmd:80, rpm:0, fault:false,
+     vfd:new THREE.Vector3(-20,-2,-20), fan:new THREE.Vector3(-20,13,-20)},
+  {name:'Fan B1', zone:'B', chain:1, on:false, cmd:55, rpm:0, fault:false,
+     vfd:new THREE.Vector3(18,-2,-4), fan:new THREE.Vector3(18,11,-4)},
+  {name:'Fan B2', zone:'B', chain:1, on:false, cmd:45, rpm:0, fault:false,
+     vfd:new THREE.Vector3(18,-2,-20), fan:new THREE.Vector3(18,12.5,-20)}
 ];
-var MAXRPM=150, farmBlades=[], driveMeshes=[], vfdLeds=[];
+var MAXRPM=150, farmBlades=[], driveMeshes=[], vfdLeds=[], pulses=[], exhaustBlades=[];
 var field=new THREE.Group(); scene.add(field);
 
 // ---- wiring split into toggleable system layers ----
@@ -659,9 +681,8 @@ farmFans.forEach(function(f,i){
   runPath([V(f.vfd.x+0.4,f.vfd.y+1.55,f.vfd.z),V(f.vfd.x+0.4,f.fan.y-1.3,f.fan.z)],M.ltflex,0.18,SYS.power); // motor cable up to fan
   SYS.power.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,0.25,12),M.conduit), f.vfd.x+0.4,f.fan.y-1.4,f.fan.z)); // motor connector
 
-  // RS-485 COMMS: short drop from the trunk into a gland + terminal on the VFD
-  field.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.45,10),M.gland), f.vfd.x+0.9,-2.9,f.vfd.z+0.45)); // strain relief
-  runPath([V(f.vfd.x,-3.5,f.vfd.z),V(f.vfd.x+0.9,-3.0,f.vfd.z+0.45),V(f.vfd.x+0.9,-2.2,f.vfd.z+0.45)],M.wireB,0.06,SYS.comms);
+  // RS-485 COMMS: strain-relief gland at each VFD (daisy trunk lands here, built below)
+  field.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.45,10),M.gland), f.vfd.x+0.9,-2.9,f.vfd.z+0.45));
 
   // FAN SUPPORT to the ceiling (downrod sized per fan height + safety cable + guy wires)
   field.add(tube(V(f.fan.x,f.fan.y+1.6,f.fan.z), V(f.fan.x,ceilY,f.fan.z), M.motor,0.16));     // downrod
@@ -677,12 +698,19 @@ farmFans.forEach(function(f,i){
 for(var jz=-28; jz<=8; jz+=6) field.add(place(box(56,0.5,0.5,M.steel), 2, ceilY+0.3, jz));             // bar joists (run in x)
 for(var dz=-28; dz<=8; dz+=3) field.add(place(box(56,0.22,0.4,M.deck), 2, ceilY+1.45, dz));            // roof deck ribs
 
-// ---- COMMS: RS-485 chain A leaves the ½" fitting at x=-6.0, chain B at x=-4.4 ----
-runPath([V(-6.0,-10.3,0),V(-6.0,yT,0),V(-6.0,yT,-6),V(-22,yT,-6),V(0,yT,-6),V(0,yT,-22)],M.wireB,0.1,SYS.comms);
-runPath([V(-22,yT,-6),V(-22,-3.5,-6)],M.wireB,0.1,SYS.comms);
-runPath([V(0,yT,-22),V(0,-3.5,-22)],M.wireB,0.1,SYS.comms);
-runPath([V(-4.4,-10.3,0),V(-4.4,yT,0),V(-4.4,yT,-3),V(20,yT,-3)],M.wireB,0.1,SYS.comms);
-runPath([V(20,yT,-3),V(20,-3.5,-3)],M.wireB,0.1,SYS.comms);
+// ---- COMMS: RS-485 daisy chains — cabinet -> drive -> drive (not home-run) ----
+function commsTerm(v){ return V(v.x+0.9,-2.2,v.z+0.45); }   // RS-485 landing on a VFD
+function daisyChain(fitX, vfds){
+  var v0=vfds[0], full=[V(fitX,-10.3,0),V(fitX,yT,0),V(fitX,yT,v0.z)];
+  vfds.forEach(function(v){ var t=commsTerm(v); full.push(V(t.x,yT,v.z)); full.push(t); full.push(V(t.x,yT,v.z)); });
+  runPath(full,M.wireB,0.09,SYS.comms);              // shielded twisted pair, device-to-device
+  pulseTrail(full.slice(),SYS.comms,0x35a7ff,2,0.12); // polling pulses visit each node
+  // 120Ω termination resistor on the LAST drive of the chain
+  var last=vfds[vfds.length-1];
+  field.add(place(box(0.5,0.3,0.3,M.brkT,'rs485'), last.x+0.9, -1.6, last.z+0.45));
+}
+daisyChain(-6.0, [farmFans[0].vfd, farmFans[1].vfd]);   // Chain A (ttyS0)
+daisyChain(-4.4, [farmFans[2].vfd, farmFans[3].vfd]);   // Chain B (ttyS1)
 // internal: each RS-485 terminal + fire drops down its own fitting
 runPath([V(-6.0,-6.4,z0),V(-6.0,-9.4,z0)],M.wireB,0.06,SYS.comms);
 runPath([V(-4.4,-6.4,z0),V(-4.4,-9.4,z0)],M.wireB,0.06,SYS.comms);
@@ -726,23 +754,44 @@ var smudge=smudgeTex();
 function fitState(){ var fault=farmFans.some(function(f){return f.fault;}), on=farmFans.some(function(f){return f.on;});
   if(fireAlarm) return ['FIRE','#ff4d4f']; if(fault) return ['FAULT','#ff4d4f']; if(on) return ['RUNNING','#43d17a']; return ['READY','#7fb2d8']; }
 function drawMasterHMI(h){ var x=h.ctx,W=h.canvas.width,H=h.canvas.height;
-  x.textAlign='left'; x.fillStyle='#06101b'; x.fillRect(0,0,W,H);
-  x.fillStyle='#0a1929'; x.fillRect(0,0,W,H*0.17);
-  x.fillStyle='#2196f3'; x.font='bold '+Math.round(H*0.08)+'px Arial'; x.textBaseline='middle'; x.fillText('FanOS Pro',W*0.04,H*0.07);
-  x.fillStyle='#6b8299'; x.font=Math.round(H*0.036)+'px Arial'; x.fillText('AIR MOVEMENT CONTROL',W*0.04,H*0.135);
-  var st=fitState(); x.fillStyle=st[1]; roundRect(x,W*0.73,H*0.032,W*0.23,H*0.1,6); x.fill();
-  x.fillStyle='#06101b'; x.font='bold '+Math.round(H*0.05)+'px Arial'; x.textAlign='center'; x.fillText(st[0],W*0.845,H*0.083); x.textAlign='left';
-  var ry=H*0.23, rh=H*0.205;
-  farmFans.forEach(function(f,i){ var yy=ry+i*rh;
-    x.fillStyle='#0e1b29'; roundRect(x,W*0.04,yy,W*0.92,rh*0.84,7); x.fill();
-    x.fillStyle='#cdd9e5'; x.font='bold '+Math.round(H*0.05)+'px Arial'; x.fillText(f.name+'  ·  Zone '+f.zone,W*0.075,yy+rh*0.28);
-    x.fillStyle=f.fault?'#ff4d4f':((f.on&&!fireAlarm)?'#43d17a':'#41526b'); x.beginPath(); x.arc(W*0.9,yy+rh*0.3,H*0.022,0,6.3); x.fill();
-    var pct=(f.on&&!f.fault&&!fireAlarm)?f.rpm/MAXRPM:0;
-    x.fillStyle='#13283c'; roundRect(x,W*0.075,yy+rh*0.46,W*0.85,rh*0.17,4); x.fill();
-    x.fillStyle=f.fault?'#ff4d4f':'#2196f3'; roundRect(x,W*0.075,yy+rh*0.46,W*0.85*Math.max(0.02,pct),rh*0.17,4); x.fill();
-    x.fillStyle='#6b8299'; x.font=Math.round(H*0.033)+'px Arial'; x.fillText((f.on&&!fireAlarm?'RUN':'OFF')+' · '+Math.round(f.rpm)+' rpm',W*0.075,yy+rh*0.745); });
-  if(fireAlarm){ x.fillStyle='rgba(220,32,40,0.92)'; x.fillRect(0,H*0.9,W,H*0.1);
-    x.fillStyle='#fff'; x.font='bold '+Math.round(H*0.045)+'px Arial'; x.textAlign='center'; x.fillText('FIRE INTERLOCK ACTIVE — MONITORING ONLY',W*0.5,H*0.951); x.textAlign='left'; }
+  x.textAlign='left'; x.textBaseline='middle';
+  x.fillStyle='#f4f5f7'; x.fillRect(0,0,W,H);
+  // topbar (white)
+  x.fillStyle='#ffffff'; x.fillRect(0,0,W,H*0.135);
+  x.strokeStyle='rgba(0,0,0,0.08)'; x.lineWidth=1; x.beginPath(); x.moveTo(0,H*0.135); x.lineTo(W,H*0.135); x.stroke();
+  x.fillStyle='#1d2b3a'; x.font='700 '+Math.round(H*0.05)+'px Arial'; x.fillText('FanOS',W*0.03,H*0.05);
+  var fw=x.measureText('FanOS').width; x.fillStyle='#0071e3'; x.fillText('Pro',W*0.03+fw+H*0.01,H*0.05);
+  x.fillStyle='#1d2b3a'; x.font='600 '+Math.round(H*0.03)+'px Arial'; x.fillText('Acme Manufacturing',W*0.22,H*0.045);
+  x.fillStyle='#8a9ab0'; x.font=Math.round(H*0.024)+'px Arial'; x.fillText('Building 2 · Main Floor',W*0.22,H*0.082);
+  var pillC=fireAlarm?'#ff3b30':(farmFans.some(function(f){return f.fault;})?'#e6ac00':'#28c840');
+  var pillT=fireAlarm?'Fire Interlock':(farmFans.some(function(f){return f.fault;})?'Fault':'Normal');
+  x.fillStyle='#ffffff'; roundRect(x,W*0.63,H*0.035,W*0.2,H*0.062,H*0.031); x.fill(); x.strokeStyle='rgba(0,0,0,0.08)'; x.stroke();
+  x.fillStyle=pillC; x.beginPath(); x.arc(W*0.66,H*0.066,H*0.013,0,6.3); x.fill();
+  x.fillStyle='#4a5f72'; x.font='600 '+Math.round(H*0.027)+'px Arial'; x.fillText(pillT,W*0.68,H*0.067);
+  x.fillStyle='#1d2b3a'; x.font='600 '+Math.round(H*0.03)+'px Arial'; x.textAlign='right'; x.fillText('9:18 AM',W*0.97,H*0.045);
+  x.fillStyle='#8a9ab0'; x.font=Math.round(H*0.022)+'px Arial'; x.fillText('Thu May 21',W*0.97,H*0.085); x.textAlign='left';
+  // zone pills
+  var zy=H*0.165, pills=['All Zones','Zone A','Zone B','Fan Types','Sensors'], px=W*0.03;
+  x.font='600 '+Math.round(H*0.026)+'px Arial';
+  pills.forEach(function(p,i){ var pw=x.measureText(p).width+H*0.045;
+    x.fillStyle=(i===0)?'#0071e3':'#ffffff'; roundRect(x,px,zy,pw,H*0.052,H*0.026); x.fill();
+    if(i!==0){ x.strokeStyle='rgba(0,0,0,0.08)'; x.stroke(); }
+    x.fillStyle=(i===0)?'#ffffff':'#4a5f72'; x.fillText(p,px+H*0.022,zy+H*0.027); px+=pw+W*0.012; });
+  // fan tiles (2-column grid)
+  var n=farmFans.length, gx=W*0.03, gy=H*0.265, gw=(W*0.94-W*0.02)/2, gh=(H*0.64)/Math.ceil(n/2)-H*0.02;
+  farmFans.forEach(function(f,i){ var col=i%2, row=Math.floor(i/2), tx=gx+col*(gw+W*0.02), ty=gy+row*(gh+H*0.02);
+    x.fillStyle='#ffffff'; roundRect(x,tx,ty,gw,gh,H*0.022); x.fill(); x.strokeStyle='rgba(0,0,0,0.06)'; x.stroke();
+    var dc=f.fault?'#ff3b30':((f.on&&!fireAlarm)?'#28c840':'#b0bec5');
+    x.fillStyle=dc; x.beginPath(); x.arc(tx+gw-H*0.045,ty+H*0.055,H*0.016,0,6.3); x.fill();
+    x.fillStyle='#1d2b3a'; x.font='700 '+Math.round(H*0.04)+'px Arial'; x.fillText(f.name,tx+H*0.04,ty+H*0.06);
+    x.fillStyle='#8a9ab0'; x.font=Math.round(H*0.027)+'px Arial'; x.fillText('Zone '+f.zone+' · HVLS',tx+H*0.04,ty+H*0.105);
+    var pct=(f.on&&!f.fault&&!fireAlarm)?Math.round(f.rpm/MAXRPM*100):0;
+    x.fillStyle=f.fault?'#ff3b30':'#1d2b3a'; x.font='700 '+Math.round(H*0.066)+'px Arial'; x.fillText(f.fault?'FAULT':(pct+'%'),tx+H*0.04,ty+gh*0.62);
+    x.fillStyle='#8a9ab0'; x.font=Math.round(H*0.026)+'px Arial'; x.fillText(Math.round(f.rpm)+' rpm',tx+H*0.04,ty+gh*0.84);
+    x.fillStyle='#eef0f3'; roundRect(x,tx+gw*0.42,ty+gh*0.72,gw*0.52,H*0.028,H*0.014); x.fill();
+    x.fillStyle=f.fault?'#ff3b30':'#0071e3'; roundRect(x,tx+gw*0.42,ty+gh*0.72,gw*0.52*Math.max(0.03,pct/100),H*0.028,H*0.014); x.fill(); });
+  if(fireAlarm){ x.fillStyle='rgba(255,59,48,0.96)'; x.fillRect(0,H*0.93,W,H*0.07);
+    x.fillStyle='#fff'; x.font='700 '+Math.round(H*0.033)+'px Arial'; x.textAlign='center'; x.fillText('FIRE INTERLOCK ACTIVE — MONITORING ONLY',W*0.5,H*0.965); x.textAlign='left'; }
   h.tex.needsUpdate=true; }
 function drawDoorHMI(h){ var x=h.ctx,W=h.canvas.width,H=h.canvas.height;
   x.textAlign='center'; x.fillStyle='#06101b'; x.fillRect(0,0,W,H);
@@ -787,7 +836,7 @@ var fireGlow=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.4),new THREE.MeshBasic
 fireGlow.position.set(-0.6,-7.0,compZ+0.5); cabinet.add(fireGlow);
 
 // ---- data-flow pulses (parented to layer groups so they hide when a layer is hidden) ----
-var pulses=[], hmiAcc=0;
+var hmiAcc=0;
 function pointAt(P,frac){ var d=frac*P.total,k=0;
   while(k<P.segs.length-1 && d>P.segs[k]){ d-=P.segs[k]; k++; }
   var a=P.points[k],b=P.points[k+1],s=P.segs[k]||1,u=Math.min(1,d/s);
@@ -797,9 +846,6 @@ function pulseTrail(points,group,color,count,speed){
   var mat=new THREE.MeshBasicMaterial({color:color,toneMapped:false}),meshes=[];
   for(var c=0;c<count;c++){ var s=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,8),mat); group.add(s); meshes.push(s); }
   pulses.push({points:points,segs:segs,total:total,meshes:meshes,speed:speed,off:Math.random(),count:count}); }
-pulseTrail([V(-6.0,yT,0),V(-6.0,yT,-6),V(-22,yT,-6),V(-22,-3.5,-6)],SYS.comms,0x35a7ff,2,0.16);
-pulseTrail([V(-6.0,yT,-6),V(0,yT,-6),V(0,yT,-22),V(0,-3.5,-22)],SYS.comms,0x35a7ff,2,0.14);
-pulseTrail([V(-4.4,yT,0),V(-4.4,yT,-3),V(20,yT,-3),V(20,-3.5,-3)],SYS.comms,0x35a7ff,2,0.13);
 pulseTrail([V(3.2,yT,0),V(3.2,yT,8),V(13,yT,8),V(13,-4,8)],SYS.ethernet,0x26c6da,2,0.15);
 pulseTrail([V(1.2,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],SYS.relay,0xffb300,2,0.12);
 pulseTrail([V(1.2,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],SYS.relay,0xffb300,2,0.12);
@@ -808,11 +854,29 @@ runPath([V(3.2,-8.4,z0),V(3.2,-9.4,z0)],M.wireC,0.06,SYS.ethernet); // Cat6 drop
 
 // ---- RELAY outputs: stub at module + field runs to on/off devices ----
 runPath([V(-0.4,0.1,z0),V(-0.4,-0.6,z0)],M.wireO,0.07,SYS.relay);
-var ex=box(3,3,1.6,M.eth,'exhaust'); ex.position.set(-13,7,-22); field.add(ex);
-var lv=box(3.2,2,1.2,M.disc,'louver'); lv.position.set(11,4,-22); field.add(lv);
-runPath([V(1.2,-10.3,0),V(1.2,yT,0),V(-13,yT,0),V(-13,yT,-22),V(-13,5.5,-22)],M.wireO,0.06,SYS.relay);
-runPath([V(1.2,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],M.wireO,0.06,SYS.relay);
-runPath([V(1.2,-8.4,z0),V(1.2,-9.4,z0)],M.wireO,0.06,SYS.relay); // relay output drops into its ½" fitting
+// ---- Roof exhaust fan — large 3φ 240 V upblast roof exhauster, relay-piloted ----
+(function(){ var rg=new THREE.Group(); rg.position.set(10,18,-16);
+  rg.add(box(5,1.0,5,M.disc,'exhaust'));                                                      // roof curb
+  rg.add(place(new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.4,2.2,20),M.eth),0,1.7,0));    // housing band
+  rg.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.3,3.0,1.7,20),M.disc),0,3.5,0));   // upblast hood
+  rg.add(place(new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.9,12),M.aaeon),0,2.7,0));// motor
+  var rw=new THREE.Group();                                                                   // fan wheel (spins about Y)
+  for(var i=0;i<8;i++){ var bl=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.12,0.55),M.hvlsBlade); bl.position.x=1.15; bl.rotation.x=0.5;
+    var hh=new THREE.Group(); hh.add(bl); hh.rotation.y=i*(Math.PI*2/8); rw.add(hh); }
+  rw.position.y=0.4; rg.add(rw); exhaustBlades.push(rw);
+  var grd=new THREE.Mesh(new THREE.TorusGeometry(2.1,0.08,6,20),M.rail); grd.rotation.x=Math.PI/2; grd.position.y=-0.1; rg.add(grd); // bird guard
+  var dq=makeDisconnect(); dq.scale.set(0.85,0.85,0.85); dq.position.set(3.2,1.3,0); rg.add(dq);  // 3φ safety disconnect
+  rg.traverse(function(c){ if(c.isMesh&&!c.userData.key){ c.userData.key='exhaust'; selectable.push(c); (partRefs.exhaust=partRefs.exhaust||[]).push(c);} });
+  field.add(rg);
+})();
+var lv=box(3.2,2,1.2,M.disc,'louver'); lv.position.set(11,4,-22); field.add(lv);    // powered intake louver (relay on/off)
+// 3φ 240 V power to the roof fan (EMT), separate from the relay control circuit
+runPath([V(13.2,21,-16),V(13.2,19.3,-16)],M.conduit,0.22,SYS.power);                 // roof feed -> disconnect
+runPath([V(12.6,19.0,-16),V(12.6,20,-16),V(10,20,-16),V(10,19.2,-16)],M.ltflex,0.18,SYS.power); // disconnect -> fan motor
+// relay PILOT (on/off control only) up to the roof-fan starter
+runPath([V(1.2,-10.3,0),V(1.2,yT,0),V(10,yT,0),V(10,yT,-16),V(10,17.2,-16),V(12.6,17.2,-16),V(12.6,18.7,-16)],M.wireO,0.05,SYS.relay);
+runPath([V(1.2,yT,0),V(11,yT,0),V(11,yT,-22),V(11,3,-22)],M.wireO,0.06,SYS.relay);    // louver
+runPath([V(1.2,-8.4,z0),V(1.2,-9.4,z0)],M.wireO,0.06,SYS.relay);                      // relay output -> ½" fitting
 
 // ---- FIRE ALARM: dry-contact interlock out its own ½" fitting to the building FACP ----
 var facp=box(2.6,3.4,1.0,M.eth,'firealarm'); facp.position.set(6,2,-22); field.add(facp);
@@ -891,7 +955,7 @@ applyCam();
 var pointers={},lastSingle=null,pinchStart=0,radiusStart=0,downInfo=null;
 var el=renderer.domElement;
 function pos(e){return {x:e.clientX,y:e.clientY};}
-el.addEventListener('pointerdown',function(e){ el.setPointerCapture(e.pointerId); pointers[e.pointerId]=pos(e);
+el.addEventListener('pointerdown',function(e){ if(typeof camTween!=='undefined'&&camTween)camTween.active=false; el.setPointerCapture(e.pointerId); pointers[e.pointerId]=pos(e);
   var n=Object.keys(pointers).length;
   if(n===1){ lastSingle=pos(e); downInfo={x:e.clientX,y:e.clientY,t:Date.now()}; }
   if(n===2){ var p=Object.values(pointers); pinchStart=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
@@ -933,10 +997,10 @@ function setEm(key,on){ (partRefs[key]||[]).forEach(function(m){
   if(on){ if(!m.userData._clone){ m.material=m.material.clone(); m.userData._clone=true; }
     m.material.emissive=new THREE.Color(0x2196f3); m.material.emissiveIntensity=0.5; }
   else { if(m.material.emissive){ m.material.emissive=new THREE.Color(0x000000); m.material.emissiveIntensity=0; } } }); }
-function clearSel(){ if(selectedKey) setEm(selectedKey,false); selectedKey=null; syncChips(); }
+function clearSel(){ if(selectedKey){ setEm(selectedKey,false); traceOff(); } selectedKey=null; syncChips(); }
 function selectPart(key){ if(!DATA[key])return;
-  if(selectedKey&&selectedKey!==key) setEm(selectedKey,false);
-  selectedKey=key; setEm(key,true); showInfo(key); syncChips(); focusOn(key); hideHint(); }
+  if(selectedKey&&selectedKey!==key){ setEm(selectedKey,false); traceOff(); }
+  selectedKey=key; setEm(key,true); traceOn(key); showInfo(key); syncChips(); focusOn(key); hideHint(); }
 function focusOn(key){ var arr=partRefs[key]; if(!arr||!arr.length)return;
   var c=new THREE.Vector3(); arr.forEach(function(m){ var wp=new THREE.Vector3(); m.getWorldPosition(wp); c.add(wp); });
   c.multiplyScalar(1/arr.length); animTarget=c; }
@@ -945,7 +1009,7 @@ var infoEl=document.getElementById('info');
 function showInfo(key){ var d=DATA[key];
   document.getElementById('iTag').textContent=d.tag;
   document.getElementById('iName').textContent=d.name;
-  document.getElementById('iDesc').textContent=d.desc; infoEl.classList.add('show'); }
+  document.getElementById('iDesc').textContent=d.desc; renderSpecs(key); infoEl.classList.add('show'); }
 function hideInfo(){ infoEl.classList.remove('show'); }
 document.getElementById('iClose').onclick=function(){ hideInfo(); clearSel(); };
 
@@ -1059,6 +1123,95 @@ layersBtn.onclick=function(){ layOpen=!layOpen; layEl.classList.toggle('show',la
 document.getElementById('resetBtn').onclick=function(){
   sph.radius=70; sph.theta=0.62; sph.phi=1.18; animTarget=new THREE.Vector3(0,1,-6); clearSel(); hideInfo(); };
 
+/* ================= Phase 6: engineering-tool layer ================= */
+// Part 1 — system tracing relationships
+var RELATED={
+  fan:['fan','vfd','disconnect','aaeon','screen'], vfd:['vfd','disconnect','breaker','aaeon','fan'],
+  disconnect:['disconnect','vfd','breaker','fan'], eth:['eth','poe','aaeon','screen'], poe:['poe','eth','aaeon','screen'],
+  aaeon:['aaeon','eth','poe','vfd','relay','screen','fan'], screen:['screen','poe','eth','aaeon'], relay:['relay','aaeon'],
+  psu24:['psu24','psu12','breaker','aaeon'], psu12:['psu12','psu24','breaker'], breaker:['breaker','psu24','psu12','disconnect'] };
+var traceRel=[];
+function dimScene(on){ key.intensity=on?0.5:1.15; amb.intensity=on?0.13:0.32; }
+function traceOn(k){ traceRel=(RELATED[k]||[]).filter(function(x){return x!==k;});
+  traceRel.forEach(function(x){ setEm(x,true); }); dimScene(traceRel.length>0); }
+function traceOff(){ traceRel.forEach(function(x){ setEm(x,false); }); traceRel=[]; dimScene(false); }
+
+// Part 3 — electrical specifications
+var SPECS={
+  vfd:{Manufacturer:'Invertek',Model:'Optidrive E3 (ODE-3)',Power:'≤ 7.5 kW',Voltage:'380–480 VAC 3φ',Current:'per motor FLA',Communication:'Modbus RTU · RS-485',Modbus:'1 – 3',Firmware:'3.21'},
+  aaeon:{Manufacturer:'AAEON',Model:'UP 7000 Edge',Power:'~12 W',Voltage:'12 VDC',Current:'~1.0 A',Communication:'2× RS-485 + Ethernet',Modbus:'Master',Firmware:'FanOS Pro 1.4'},
+  eth:{Manufacturer:'—',Model:'Unmanaged switch (DIN)',Power:'~5 W',Voltage:'24 VDC',Current:'0.2 A',Communication:'Ethernet',Modbus:'—',Firmware:'—'},
+  poe:{Manufacturer:'—',Model:'PoE switch (DIN)',Power:'~60 W',Voltage:'24 / 48 VDC',Current:'~1.3 A',Communication:'Ethernet · PoE',Modbus:'—',Firmware:'—'},
+  relay:{Manufacturer:'Waveshare',Model:'8-ch Modbus RTU relay',Power:'~3 W',Voltage:'24 VDC',Current:'0.13 A',Communication:'Modbus RTU · RS-485',Modbus:'10',Firmware:'1.0'},
+  psu24:{Manufacturer:'Mean Well',Model:'HDR-60-24',Power:'60 W',Voltage:'24 VDC out',Current:'2.5 A',Communication:'—',Modbus:'—',Firmware:'—'},
+  psu12:{Manufacturer:'Mean Well',Model:'12 V supply',Power:'30 W',Voltage:'12 VDC out',Current:'2.5 A',Communication:'—',Modbus:'—',Firmware:'—'},
+  disconnect:{Manufacturer:'—',Model:'Non-fused disconnect',Power:'—',Voltage:'480 VAC',Current:'per drive',Communication:'—',Modbus:'—',Firmware:'—'},
+  breaker:{Manufacturer:'—',Model:'DIN breaker + SPD',Power:'—',Voltage:'480 VAC',Current:'15 A',Communication:'—',Modbus:'—',Firmware:'—'},
+  screen:{Manufacturer:'—',Model:'27" PoE touchscreen',Power:'~25 W (PoE)',Voltage:'48 VDC PoE',Current:'0.5 A',Communication:'Ethernet',Modbus:'—',Firmware:'FanOS Pro 1.4'},
+  fan:{Manufacturer:'GFY · Vivid Air',Model:'HVLS fan',Power:'1 – 2 HP',Voltage:'480 VAC 3φ (via VFD)',Current:'per motor',Communication:'via VFD',Modbus:'—',Firmware:'—'} };
+var tempBase={vfd:41,aaeon:44,eth:38,poe:46,relay:36,psu24:43,psu12:39,disconnect:30,breaker:33,screen:35,fan:34};
+function renderSpecs(k){ var bx=document.getElementById('iSpecs'), s=SPECS[k];
+  if(!s){ bx.innerHTML=''; bx.style.display='none'; return; } bx.style.display='grid';
+  var anyFault=farmFans.some(function(f){return f.fault;}), anyOn=farmFans.some(function(f){return f.on;});
+  var comm=(k==='vfd'||k==='aaeon'||k==='relay'||k==='eth'||k==='poe'||k==='screen'), status,scls;
+  if(fireAlarm&&(k==='vfd'||k==='fan')){ status='Stopped · interlock'; scls='warn'; }
+  else if(k==='vfd'&&anyFault){ status='Fault'; scls='bad'; }
+  else if(comm){ status='Online'; scls='ok'; } else { status='Energized'; scls='ok'; }
+  var rows=[['Manufacturer',s.Manufacturer,''],['Model',s.Model,''],['Power',s.Power,''],['Voltage',s.Voltage,''],
+    ['Current',s.Current,''],['Communication',s.Communication,''],['Modbus address',s.Modbus,''],['Firmware',s.Firmware,''],
+    ['Status',status,scls],['Last poll',comm?(Math.round(pollAcc)+' ms ago'):'—',comm?'ok':''],
+    ['Fault state',(k==='vfd'&&anyFault)?'Active':'None',(k==='vfd'&&anyFault)?'bad':'ok'],
+    ['Temperature',Math.round(tempBase[k]+(anyOn?3:0)+Math.sin(Date.now()*0.001+tempBase[k])*1.5)+' °C','']];
+  bx.innerHTML=rows.map(function(r){ return '<div class="k">'+r[0]+'</div><div class="v'+(r[2]?' '+r[2]:'')+'">'+r[1]+'</div>'; }).join(''); }
+
+// Part 8 — camera presets (smooth tween)
+var camTween={active:false,t:0,fromT:null,toT:null,fromS:null,toS:null};
+function gotoPreset(p){ camTween.fromT=target.clone(); camTween.toT=new THREE.Vector3(p.t[0],p.t[1],p.t[2]);
+  camTween.fromS={radius:sph.radius,theta:sph.theta,phi:sph.phi}; camTween.toS={radius:p.r,theta:p.th,phi:p.ph};
+  camTween.t=0; camTween.active=true; animTarget=camTween.toT.clone(); }
+var PRESETS=[{n:'Overview',t:[0,1,-6],r:70,th:0.62,ph:1.18},{n:'Cabinet',t:[0,1,0],r:34,th:0.48,ph:1.22},
+  {n:'AAEON',t:[-4.3,7.7,1],r:18,th:0.42,ph:1.12},{n:'Power',t:[-4.9,0.6,1],r:20,th:0.5,ph:1.28},
+  {n:'Networking',t:[1.4,6.0,1],r:22,th:0.55,ph:1.12},{n:'Ground',t:[-2,-5.6,1],r:20,th:0.55,ph:1.34},
+  {n:'VFDs',t:[-1,-2,-10],r:72,th:0.75,ph:1.2},{n:'Fans',t:[0,12,-12],r:86,th:0.6,ph:0.92},
+  {n:'Touchscreen',t:[13,1.6,8],r:22,th:0.18,ph:1.18}];
+(function(){ var camEl=document.getElementById('cam');
+  camEl.innerHTML=PRESETS.map(function(p,i){ return '<div class="cchip'+(i===0?' active':'')+'" data-i="'+i+'">'+p.n+'</div>'; }).join('');
+  camEl.querySelectorAll('.cchip').forEach(function(c){ c.onclick=function(){ gotoPreset(PRESETS[+c.dataset.i]);
+    camEl.querySelectorAll('.cchip').forEach(function(o){ o.classList.remove('active'); }); c.classList.add('active'); hideHint(); }; }); })();
+
+// Part 7 — X-Ray
+var xray=false, xrayBtn=document.getElementById('xrayBtn');
+xrayBtn.onclick=function(){ xray=!xray; [M.white,M.door].forEach(function(m){ m.transparent=xray; m.opacity=xray?0.15:1.0; m.depthWrite=!xray; m.needsUpdate=true; });
+  xrayBtn.classList.toggle('on',xray); xrayBtn.textContent=xray?'Solid':'X-Ray'; };
+
+// Part 6 — Exploded view
+var explodeAmt=0, explodeTarget=0, explodeBtn=document.getElementById('explodeBtn');
+var explodeItems=cabinet.children.map(function(o){ return {o:o, z0:o.position.z}; });
+explodeBtn.onclick=function(){ explodeTarget=explodeTarget>0.5?0:1; explodeBtn.classList.toggle('on',explodeTarget>0.5);
+  explodeBtn.textContent=explodeTarget>0.5?'Assemble':'Exploded'; };
+
+// Part 4 — Diagnostics
+var diagEl=document.getElementById('diag'), diagOpen=false, diagAcc=0, diagBtn=document.getElementById('diagBtn');
+var diagState={cpu:18,mem:34,lat:3,frame:0,crc:0};
+function diagVal(){ var faults=farmFans.filter(function(f){return f.fault;}).length;
+  var nA=farmFans.filter(function(f){return f.chain===0;}).length, nB=farmFans.filter(function(f){return f.chain===1;}).length;
+  diagState.cpu=Math.max(8,Math.min(46,diagState.cpu+(Math.random()-0.5)*5));
+  diagState.mem=Math.max(28,Math.min(62,diagState.mem+(Math.random()-0.5)*2));
+  diagState.lat=Math.max(1,Math.min(9,diagState.lat+(Math.random()-0.5)*1.5));
+  if(Math.random()<0.12) diagState.frame++; if(Math.random()<0.06) diagState.crc++;
+  return [['Controller','Online','ok'],['RS-485 Bus A','OK · '+nA+' nodes','ok'],['RS-485 Bus B','OK · '+nB+' nodes','ok'],
+    ['Ethernet','Link 1 Gbps','ok'],['PoE','2 ports · 41 W','ok'],['Relay module','Online','ok'],['Power supplies','24 V / 12 V OK','ok'],
+    ['CPU usage',Math.round(diagState.cpu)+' %',''],['Memory',Math.round(diagState.mem)+' %',''],['Polling rate','~4 dev/s',''],
+    ['Network latency',diagState.lat.toFixed(1)+' ms',''],['Frame errors',String(diagState.frame),diagState.frame>3?'warn':''],
+    ['CRC errors',String(diagState.crc),diagState.crc>2?'warn':''],['Offline devices','0','ok'],
+    ['Fault count',String(faults),faults?'bad':'ok'],['Fire interlock',fireAlarm?'ACTIVE':'Normal',fireAlarm?'bad':'ok']]; }
+function renderDiag(){ diagEl.innerHTML='<h3>System Diagnostics · simulated</h3>'+diagVal().map(function(r){
+  return '<div class="drow"><span class="k">'+r[0]+'</span><span class="v'+(r[2]?' '+r[2]:'')+'">'+r[1]+'</span></div>'; }).join(''); }
+diagBtn.onclick=function(){ diagOpen=!diagOpen; if(diagOpen) renderDiag(); diagEl.classList.toggle('show',diagOpen); diagBtn.classList.toggle('on',diagOpen); };
+
+// Part 2 — subtle white power flow (ground never animates)
+farmFans.forEach(function(f){ pulseTrail([V(f.vfd.x+0.4,f.vfd.y+1.55,f.vfd.z),V(f.vfd.x+0.4,f.fan.y-1.3,f.fan.z)],SYS.power,0xeaf0f6,1,0.04); });
+
 /* ---------------- Hint ---------------- */
 var hintEl=document.getElementById('hint'),hintGone=false;
 function hideHint(){ if(!hintGone){ hintGone=true; hintEl.style.opacity=0;
@@ -1072,6 +1225,7 @@ function loop(){
   var now=performance.now(), dt=now-lastT; lastT=now;
   doorCurrent+=(doorTarget-doorCurrent)*0.12; doorPivot.rotation.y=doorCurrent;
   for(var c=0;c<coolingBlades.length;c++){ coolingBlades[c].rotation.y+=0.35; }
+  for(var xb=0;xb<exhaustBlades.length;xb++){ exhaustBlades[xb].rotation.y+=fireAlarm?0:0.4; }
   for(var i=0;i<farmFans.length;i++){ var f=farmFans[i];
     var tgt=(f.on&&!f.fault&&!fireAlarm)?f.cmd/100*MAXRPM:0;
     f.rpm+=(tgt-f.rpm)*0.04; farmBlades[i].rotation.y+=f.rpm*0.00045*dt;
@@ -1104,7 +1258,16 @@ function loop(){
   hmiAcc+=dt; if(hmiAcc>340){ hmiAcc=0; drawMasterHMI(masterHMI); drawDoorHMI(doorHMI);
     var sb=document.getElementById('sysBadge'); if(sb){ var s2=fitState(); sb.textContent=s2[0]; sb.style.color=s2[1]; sb.style.borderColor=s2[1]; } }
   refreshAcc+=dt; if(refreshAcc>120){ refreshAcc=0; refreshDash(); }
-  target.lerp(animTarget,0.08); applyCam();
+  explodeAmt+=(explodeTarget-explodeAmt)*0.1;
+  if(explodeAmt>0.001||explodeTarget>0){ for(var ei=0;ei<explodeItems.length;ei++){ var it=explodeItems[ei]; it.o.position.z=it.z0+(it.z0-SPz)*explodeAmt*1.4; } }
+  diagAcc+=dt; if(diagAcc>1000){ diagAcc=0; if(diagOpen) renderDiag(); if(infoEl.classList.contains('show')&&selectedKey) renderSpecs(selectedKey); }
+  if(camTween.active){ camTween.t=Math.min(1,camTween.t+0.05); var ee=camTween.t*camTween.t*(3-2*camTween.t);
+    target.lerpVectors(camTween.fromT,camTween.toT,ee);
+    sph.radius=camTween.fromS.radius+(camTween.toS.radius-camTween.fromS.radius)*ee;
+    sph.theta=camTween.fromS.theta+(camTween.toS.theta-camTween.fromS.theta)*ee;
+    sph.phi=camTween.fromS.phi+(camTween.toS.phi-camTween.fromS.phi)*ee;
+    if(camTween.t>=1) camTween.active=false; applyCam();
+  } else { target.lerp(animTarget,0.08); applyCam(); }
   renderer.render(scene,camera);
 }
 loop();
