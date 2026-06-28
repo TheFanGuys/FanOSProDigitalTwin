@@ -46,6 +46,71 @@
   .drow{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;}
   .drow .k{color:var(--dim);} .drow .v{font-variant-numeric:tabular-nums;color:var(--txt);}
   .drow .v.ok{color:var(--green);} .drow .v.bad{color:#ff6b6b;} .drow .v.warn{color:#ffd27a;}
+  #comm{position:fixed;left:10px;right:10px;bottom:64px;z-index:9;display:none;max-height:72vh;overflow:auto;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:14px;max-width:580px;margin:0 auto;box-shadow:0 12px 44px rgba(0,0,0,.55);}
+  #comm.show{display:block;}
+  #comm h3{font-size:14px;margin:2px 0 4px;color:#fff;letter-spacing:.3px;}
+  #comm h4{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin:16px 0 8px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:5px;}
+  #comm .csub{font-size:11px;color:var(--dim);margin-bottom:8px;}
+  .cbtn{appearance:none;border:1px solid var(--blue);background:linear-gradient(135deg,rgba(33,150,243,.22),rgba(33,150,243,.06));color:#cfe6fb;font-size:13px;font-weight:700;padding:12px 14px;border-radius:11px;cursor:pointer;width:100%;margin:4px 0;letter-spacing:.3px;}
+  .cbtn:active{transform:scale(.98);} .cbtn[disabled]{opacity:.45;border-color:var(--line);background:var(--panel2);color:var(--dim);}
+  .cbtn.sec{border-color:var(--line);background:var(--panel2);color:var(--txt);}
+  .cprog{height:8px;border-radius:5px;background:var(--panel2);overflow:hidden;margin:8px 0;border:1px solid var(--line);}
+  .cprog>i{display:block;height:100%;background:linear-gradient(90deg,#2196f3,#26c6da);width:0;transition:width .25s;}
+  .dev{border:1px solid var(--line);background:var(--panel2);border-radius:11px;padding:10px 12px;margin:8px 0;}
+  .dev .dh{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .dev .dn{font-size:13px;font-weight:700;color:var(--txt);}
+  .dev .dbus{font-size:10px;font-weight:700;color:#7fb2d8;border:1px solid #2b3a4a;border-radius:5px;padding:2px 6px;margin-left:6px;}
+  .dev .dmeta{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:3px 8px;font-size:11px;margin-top:8px;}
+  .dev .dmeta .k{color:var(--dim);} .dev .dmeta .v{color:var(--txt);text-align:right;font-variant-numeric:tabular-nums;}
+  .dst{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.4px;}
+  .dst.found{color:#7fd0ff;background:rgba(33,150,243,.14);} .dst.addr{color:var(--green);background:rgba(67,209,122,.14);} .dst.none{color:var(--dim);background:var(--panel);}
+  .dactions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .dactions .mini{flex:1;min-width:96px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font-size:12px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer;}
+  .dactions .mini:active{transform:scale(.97);} .dactions .mini.id{border-color:#1d4a6b;color:#7fd0ff;}
+  .addr-set{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .addr-set .step{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font-size:18px;font-weight:700;cursor:pointer;}
+  .addr-set .num{min-width:42px;text-align:center;font-family:ui-monospace,monospace;font-size:15px;font-weight:700;color:#fff;}
+  .addr-set .apply{flex:1;border:1px solid var(--blue);background:rgba(33,150,243,.14);color:#cfe6fb;font-size:12px;font-weight:700;padding:9px;border-radius:9px;cursor:pointer;}
+  .cwarn{background:rgba(255,59,48,.14);border:1px solid #5a1e22;color:#ff9a9a;font-size:12px;font-weight:600;padding:9px 11px;border-radius:9px;margin:8px 0;display:none;}
+  .cwarn.show{display:block;}
+  .bushealth{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .bcard{border:1px solid var(--line);background:var(--panel2);border-radius:11px;padding:11px;}
+  .bcard .bt{font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;}
+  .bcard .br{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;}
+  .bcard .br .k{color:var(--dim);} .bcard .br .v{font-variant-numeric:tabular-nums;}
+  .tag2{font-weight:800;font-size:10px;letter-spacing:.4px;}
+  .tag2.good{color:var(--green);} .tag2.warn{color:#ffd27a;} .tag2.fault{color:#ff6b6b;}
+  .vrow{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.04);}
+  .vrow .k{color:var(--txt);} .vstat{font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.5px;}
+  .vstat.pass{color:var(--green);background:rgba(67,209,122,.14);} .vstat.wait{color:var(--dim);background:var(--panel);} .vstat.warn{color:#ffd27a;background:rgba(230,172,0,.14);}
+  #commReport{border:1px solid var(--line);background:#0b1622;border-radius:11px;padding:12px;margin-top:8px;font-size:12px;line-height:1.7;display:none;}
+  #commReport.show{display:block;} #commReport b{color:#cfe6fb;} #commReport .rh{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;}
+  #facility{position:fixed;left:10px;right:10px;bottom:64px;z-index:9;display:none;max-height:74vh;overflow:auto;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:14px;max-width:600px;margin:0 auto;box-shadow:0 12px 44px rgba(0,0,0,.55);}
+  #facility.show{display:block;}
+  #facility h3{font-size:14px;margin:2px 0 4px;color:#fff;letter-spacing:.3px;}
+  #facility h4{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin:15px 0 8px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:5px;}
+  #facility .csub{font-size:11px;color:var(--dim);margin-bottom:10px;}
+  #floorWrap{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0a1320;}
+  #floorCanvas{display:block;width:100%;height:auto;touch-action:manipulation;}
+  .fstat{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .fstat .sc{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px 11px;}
+  .fstat .sc .k{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);}
+  .fstat .sc .v{font-size:15px;font-weight:700;color:#fff;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .fstat .sc .v.ok{color:var(--green);} .fstat .sc .v.bad{color:#ff6b6b;} .fstat .sc .v.warn{color:#ffd27a;}
+  .fpre{display:flex;gap:7px;flex-wrap:wrap;}
+  .fpre .pc{flex:1 0 auto;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:12px;font-weight:600;padding:9px 10px;border-radius:9px;cursor:pointer;}
+  .fpre .pc:active{transform:scale(.97);} .fpre .pc.on{border-color:var(--blue);color:#cfe6fb;background:rgba(33,150,243,.14);}
+  .zcard{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:12px;margin:10px 0;}
+  .zcard .zh{display:flex;align-items:center;justify-content:space-between;}
+  .zcard .zn{font-size:14px;font-weight:700;color:#fff;} .zcard .zn .zt{font-size:11px;color:var(--dim);font-weight:500;margin-left:6px;}
+  .zcard .zstat{font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.4px;}
+  .zstat.run{color:var(--green);background:rgba(67,209,122,.14);} .zstat.idle{color:var(--dim);background:var(--panel);} .zstat.flt{color:#ff6b6b;background:rgba(255,59,48,.14);} .zstat.stop{color:#ffd27a;background:rgba(230,172,0,.14);}
+  .zcard .zmeta{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:4px 8px;font-size:11px;margin:9px 0;}
+  .zcard .zmeta .k{color:var(--dim);} .zcard .zmeta .v{color:var(--txt);text-align:right;font-variant-numeric:tabular-nums;}
+  .zctl{display:flex;gap:7px;flex-wrap:wrap;}
+  .zctl button{flex:1;min-width:70px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font-size:12px;font-weight:600;padding:10px 8px;border-radius:9px;cursor:pointer;}
+  .zctl button:active{transform:scale(.97);}
+  .zctl button.start{border-color:#1f6b3a;color:#7be0a4;} .zctl button.stop{border-color:#6b1f22;color:#ff9a9a;} .zctl button.idf{border-color:#1d4a6b;color:#7fd0ff;}
   #hdr svg{width:40px;height:40px;flex:0 0 auto;}
   #hdr .wm{line-height:1;}
   #hdr .wm .nm{font-size:17px;font-weight:800;letter-spacing:.2px;}
@@ -206,6 +271,8 @@
 
 <div id="cam"></div>
 <div id="diag"></div>
+<div id="comm"></div>
+<div id="facility"></div>
 
 <div id="controls">
   <button class="btn primary" id="dashBtn">Dashboard</button>
@@ -214,6 +281,8 @@
   <button class="btn" id="layersBtn"><span class="dot"></span>Layers</button>
   <button class="btn" id="xrayBtn">X-Ray</button>
   <button class="btn" id="explodeBtn">Exploded</button>
+  <button class="btn" id="commBtn">Commission</button>
+  <button class="btn" id="facilityBtn">Facility</button>
   <button class="btn" id="resetBtn">Reset</button>
 </div>
 
@@ -278,7 +347,9 @@ var DATA = {
   louver:{tag:"On/off device", name:"Powered louver",
     desc:"On/off intake louver, also switched by a relay output from the module."},
   din:{tag:"Hardware", name:"DIN rail",
-    desc:"Standard 35 mm rail. Every module clips on here, stacked top-to-bottom."}
+    desc:"Standard 35 mm rail. Every module clips on here, stacked top-to-bottom."},
+  sensor:{tag:"Sensor gateway", name:"RS-485 sensor gateway",
+    desc:"Aggregates temp / humidity / airflow sensors onto RS-485 Bus B as a Modbus node. FanOS Pro reads it for ambient conditions and destratification logic."}
 };
 
 /* ---------------- Scene ---------------- */
@@ -425,6 +496,8 @@ cabinet.add(place(box(0.4,0.4,0.35,M.aaeonT,'aaeon'),-2.5,7.1,railZ+2.6)); // RS
 cabinet.add(place(box(1.2,3.9,2.8,M.eth,'eth'),-0.6,6.0,compZ));
 // PoE switch 2.0 x 4.9 x 3.0 (DIN, tall)
 cabinet.add(place(box(2.0,4.9,3.0,M.poe,'poe'),3.4,6.0,compZ));
+cabinet.add(place(box(1.0,3.0,1.6,M.aaeon,'sensor'),5.7,5.6,compZ));   // RS-485 sensor gateway (Bus B node)
+cabinet.add(place(box(0.8,0.4,0.2,M.aaeonT,'sensor'),5.7,7.0,compZ+0.85)); // gateway label/leds
 // 24V supply 1.6 x 3.5 x 2.2  +  12V brick 0.8 x 3.5
 cabinet.add(place(box(1.6,3.5,2.2,M.psu,'psu24'),-5.4,1.9,compZ));
 cabinet.add(place(box(0.8,3.5,2.2,M.psu12,'psu12'),-4.2,1.9,compZ));
@@ -700,17 +773,18 @@ for(var dz=-28; dz<=8; dz+=3) field.add(place(box(56,0.22,0.4,M.deck), 2, ceilY+
 
 // ---- COMMS: RS-485 daisy chains — cabinet -> drive -> drive (not home-run) ----
 function commsTerm(v){ return V(v.x+0.9,-2.2,v.z+0.45); }   // RS-485 landing on a VFD
-function daisyChain(fitX, vfds){
+var busPath={};
+function daisyChain(label, fitX, vfds){
   var v0=vfds[0], full=[V(fitX,-10.3,0),V(fitX,yT,0),V(fitX,yT,v0.z)];
   vfds.forEach(function(v){ var t=commsTerm(v); full.push(V(t.x,yT,v.z)); full.push(t); full.push(V(t.x,yT,v.z)); });
+  busPath[label]=full.slice();
   runPath(full,M.wireB,0.09,SYS.comms);              // shielded twisted pair, device-to-device
   pulseTrail(full.slice(),SYS.comms,0x35a7ff,2,0.12); // polling pulses visit each node
-  // 120Ω termination resistor on the LAST drive of the chain
   var last=vfds[vfds.length-1];
-  field.add(place(box(0.5,0.3,0.3,M.brkT,'rs485'), last.x+0.9, -1.6, last.z+0.45));
+  field.add(place(box(0.5,0.3,0.3,M.brkT,'rs485'), last.x+0.9, -1.6, last.z+0.45)); // 120Ω termination
 }
-daisyChain(-6.0, [farmFans[0].vfd, farmFans[1].vfd]);   // Chain A (ttyS0)
-daisyChain(-4.4, [farmFans[2].vfd, farmFans[3].vfd]);   // Chain B (ttyS1)
+daisyChain('A',-6.0, [farmFans[0].vfd, farmFans[1].vfd]);   // Chain A (ttyS0)
+daisyChain('B',-4.4, [farmFans[2].vfd, farmFans[3].vfd]);   // Chain B (ttyS1)
 // internal: each RS-485 terminal + fire drops down its own fitting
 runPath([V(-6.0,-6.4,z0),V(-6.0,-9.4,z0)],M.wireB,0.06,SYS.comms);
 runPath([V(-4.4,-6.4,z0),V(-4.4,-9.4,z0)],M.wireB,0.06,SYS.comms);
@@ -1129,7 +1203,8 @@ var RELATED={
   fan:['fan','vfd','disconnect','aaeon','screen'], vfd:['vfd','disconnect','breaker','aaeon','fan'],
   disconnect:['disconnect','vfd','breaker','fan'], eth:['eth','poe','aaeon','screen'], poe:['poe','eth','aaeon','screen'],
   aaeon:['aaeon','eth','poe','vfd','relay','screen','fan'], screen:['screen','poe','eth','aaeon'], relay:['relay','aaeon'],
-  psu24:['psu24','psu12','breaker','aaeon'], psu12:['psu12','psu24','breaker'], breaker:['breaker','psu24','psu12','disconnect'] };
+  psu24:['psu24','psu12','breaker','aaeon'], psu12:['psu12','psu24','breaker'], breaker:['breaker','psu24','psu12','disconnect'],
+  sensor:['sensor','aaeon','poe','eth'] };
 var traceRel=[];
 function dimScene(on){ key.intensity=on?0.5:1.15; amb.intensity=on?0.13:0.32; }
 function traceOn(k){ traceRel=(RELATED[k]||[]).filter(function(x){return x!==k;});
@@ -1148,8 +1223,9 @@ var SPECS={
   disconnect:{Manufacturer:'—',Model:'Non-fused disconnect',Power:'—',Voltage:'480 VAC',Current:'per drive',Communication:'—',Modbus:'—',Firmware:'—'},
   breaker:{Manufacturer:'—',Model:'DIN breaker + SPD',Power:'—',Voltage:'480 VAC',Current:'15 A',Communication:'—',Modbus:'—',Firmware:'—'},
   screen:{Manufacturer:'—',Model:'27" PoE touchscreen',Power:'~25 W (PoE)',Voltage:'48 VDC PoE',Current:'0.5 A',Communication:'Ethernet',Modbus:'—',Firmware:'FanOS Pro 1.4'},
-  fan:{Manufacturer:'GFY · Vivid Air',Model:'HVLS fan',Power:'1 – 2 HP',Voltage:'480 VAC 3φ (via VFD)',Current:'per motor',Communication:'via VFD',Modbus:'—',Firmware:'—'} };
-var tempBase={vfd:41,aaeon:44,eth:38,poe:46,relay:36,psu24:43,psu12:39,disconnect:30,breaker:33,screen:35,fan:34};
+  fan:{Manufacturer:'GFY · Vivid Air',Model:'HVLS fan',Power:'1 – 2 HP',Voltage:'480 VAC 3φ (via VFD)',Current:'per motor',Communication:'via VFD',Modbus:'—',Firmware:'—'},
+  sensor:{Manufacturer:'—',Model:'RS-485 sensor gateway',Power:'~2 W',Voltage:'24 VDC',Current:'0.08 A',Communication:'Modbus RTU · RS-485 (Bus B)',Modbus:'20',Firmware:'2.4'} };
+var tempBase={vfd:41,aaeon:44,eth:38,poe:46,relay:36,psu24:43,psu12:39,disconnect:30,breaker:33,screen:35,fan:34,sensor:37};
 function renderSpecs(k){ var bx=document.getElementById('iSpecs'), s=SPECS[k];
   if(!s){ bx.innerHTML=''; bx.style.display='none'; return; } bx.style.display='grid';
   var anyFault=farmFans.some(function(f){return f.fault;}), anyOn=farmFans.some(function(f){return f.on;});
@@ -1212,6 +1288,260 @@ diagBtn.onclick=function(){ diagOpen=!diagOpen; if(diagOpen) renderDiag(); diagE
 // Part 2 — subtle white power flow (ground never animates)
 farmFans.forEach(function(f){ pulseTrail([V(f.vfd.x+0.4,f.vfd.y+1.55,f.vfd.z),V(f.vfd.x+0.4,f.fan.y-1.3,f.fan.z)],SYS.power,0xeaf0f6,1,0.04); });
 
+/* ================= Phase 7: Commissioning Mode ================= */
+var commEl=document.getElementById('comm'), commBtn=document.getElementById('commBtn');
+var commOpen=false, scanState='idle', scanProgress=0, dupWarn=false, reportShown=false, verifyRunning=false, verifyBlocked=false;
+var busHealth={A:null,B:null};
+var commDevices=[
+  {name:'Fan A1 VFD',kind:'vfd',idx:0,bus:'A',cur:1,prop:1,model:'Optidrive E3',fw:'3.21',found:false,status:'none',resp:0,crc:0},
+  {name:'Fan A2 VFD',kind:'vfd',idx:1,bus:'A',cur:2,prop:2,model:'Optidrive E3',fw:'3.21',found:false,status:'none',resp:0,crc:0},
+  {name:'Fan B1 VFD',kind:'vfd',idx:2,bus:'B',cur:1,prop:1,model:'Optidrive E3',fw:'3.21',found:false,status:'none',resp:0,crc:0},
+  {name:'Fan B2 VFD',kind:'vfd',idx:3,bus:'B',cur:2,prop:2,model:'Optidrive E3',fw:'3.21',found:false,status:'none',resp:0,crc:0},
+  {name:'Relay Module',kind:'relay',bus:'B',cur:10,prop:10,model:'Waveshare 8-ch',fw:'1.0',found:false,status:'none',resp:0,crc:0},
+  {name:'Sensor Gateway',kind:'sensor',bus:'B',cur:20,prop:20,model:'RS-485 sensor GW',fw:'2.4',found:false,status:'none',resp:0,crc:0}];
+var verifyItems=['Controller online','RS-485 Bus A responding','RS-485 Bus B responding','All VFDs discovered','No duplicate addresses',
+  'Fire alarm input visible','Dashboard command test complete','Fault reset test complete','Stop All test complete','Cabinet door closed',
+  'System ready for customer handoff'].map(function(k){ return {k:k,s:'wait'}; });
+
+// --- 3D flash / pulse / badge system ---
+var vfdFlash={}, genFlash=[], tracePulses=[], badges={};
+function devMeshes(d){ return d.kind==='vfd'?[driveMeshes[d.idx]]:(partRefs[d.kind]||[]); }
+function devChain(d){ return busPath[d.bus]||[]; }
+function flashDevice(d,color,dur){ var until=performance.now()+dur;
+  if(d.kind==='vfd'){ vfdFlash[d.idx]={color:color,until:until}; } else { genFlash.push({meshes:devMeshes(d),color:color,until:until}); } }
+function tracePulse(points,color){ if(!points||points.length<2)return;
+  var segs=[],total=0; for(var k=0;k<points.length-1;k++){ var L=points[k].distanceTo(points[k+1]); segs.push(L); total+=L; }
+  var m=new THREE.Mesh(new THREE.SphereGeometry(0.22,8,8),new THREE.MeshBasicMaterial({color:color,toneMapped:false}));
+  SYS.comms.add(m); tracePulses.push({pts:points,segs:segs,total:total,mesh:m,t:0}); }
+function addBadge(d){ if(badges[d.name])return; var meshes=devMeshes(d); if(!meshes.length||!meshes[0])return;
+  var wp=new THREE.Vector3(); meshes[0].getWorldPosition(wp);
+  var c=document.createElement('canvas'); c.width=64;c.height=64; var g=c.getContext('2d');
+  g.fillStyle='#43d17a'; g.beginPath(); g.arc(32,32,28,0,6.3); g.fill();
+  g.strokeStyle='#06140c'; g.lineWidth=7; g.lineCap='round'; g.lineJoin='round';
+  g.beginPath(); g.moveTo(19,33); g.lineTo(28,43); g.lineTo(46,21); g.stroke();
+  var sp=new THREE.Mesh(new THREE.PlaneGeometry(2.0,2.0),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,toneMapped:false,depthTest:false}));
+  sp.position.copy(wp); sp.position.y+=2.6; sp.renderOrder=999; scene.add(sp); badges[d.name]=sp; }
+
+// --- commissioning actions ---
+function startScan(){ if(scanState==='scanning')return; scanState='scanning'; scanProgress=0;
+  commDevices.forEach(function(d){ d.found=false; d.status='none'; }); renderComm();
+  var i=0; (function step(){ if(i>=commDevices.length){ scanState='done'; scanProgress=100; computeBusHealth(); renderComm(); return; }
+    var d=commDevices[i]; d.found=true; d.status='found'; d.resp=Math.round(8+Math.random()*22); d.crc=Math.random()<0.15?1:0;
+    scanProgress=Math.round(((i+1)/commDevices.length)*100); flashDevice(d,0x35a7ff,900); tracePulse(devChain(d),0x35a7ff); renderComm();
+    i++; setTimeout(step,500); })(); }
+function bumpAddr(di,delta){ var d=commDevices[di]; if(!d)return; d.prop=Math.max(1,Math.min(247,d.prop+delta)); dupWarn=false; renderComm(); }
+function applyAddr(di){ var d=commDevices[di]; if(!d)return; dupWarn=false;
+  var dup=commDevices.some(function(o,j){ return j!==di && o.bus===d.bus && o.found && o.cur===d.prop; });
+  if(dup){ dupWarn=true; renderComm(); return; }
+  d.cur=d.prop; d.status='addr'; addBadge(d); flashDevice(d,0x43d17a,900); tracePulse(devChain(d),0x43d17a); renderComm(); }
+function identify(di){ var d=commDevices[di]; if(!d)return; tracePulse(devChain(d),0x2196f3); highlightDashRow(d);
+  if(d.kind==='vfd'){ vfdFlash[d.idx]={color:0x2196f3,until:performance.now()+1700}; showInfo('vfd');
+    var wp=new THREE.Vector3(); driveMeshes[d.idx].getWorldPosition(wp); animTarget=wp; }
+  else { selectPart(d.kind); flashDevice(d,0x2196f3,1700); } }
+function highlightDashRow(d){ try{ if(d.kind!=='vfd')return; var rows=document.querySelectorAll('#dash .drv');
+  if(rows&&rows[d.idx]){ var r=rows[d.idx]; r.style.transition='background .2s'; r.style.background='rgba(33,150,243,.22)';
+    setTimeout(function(){ r.style.background=''; },1400); } }catch(e){} }
+function computeBusHealth(){ ['A','B'].forEach(function(b){ var ds=commDevices.filter(function(d){return d.bus===b&&d.found;});
+  var crc=ds.reduce(function(a,d){return a+d.crc;},0), avg=ds.length?Math.round(ds.reduce(function(a,d){return a+d.resp;},0)/ds.length):0;
+  busHealth[b]={found:ds.length,avg:avg,crc:crc,term:'GOOD',bias:'GOOD',shield:(crc>0?'WARNING':'GOOD')}; }); }
+function evalVerify(k){
+  if(k==='All VFDs discovered') return commDevices.filter(function(d){return d.kind==='vfd'&&d.found;}).length===4?'pass':'warn';
+  if(k==='No duplicate addresses'){ var seen={},dup=false; commDevices.forEach(function(d){ var key=d.bus+':'+d.cur; if(seen[key])dup=true; seen[key]=1; }); return dup?'warn':'pass'; }
+  if(k==='Cabinet door closed') return doorOpen?'warn':'pass';
+  if(k==='RS-485 Bus A responding') return (busHealth.A&&busHealth.A.found>0)?'pass':'warn';
+  if(k==='RS-485 Bus B responding') return (busHealth.B&&busHealth.B.found>0)?'pass':'warn';
+  return 'pass'; }
+function runVerify(){ if(fireAlarm){ verifyBlocked=true; renderComm(); return; } verifyBlocked=false; verifyRunning=true;
+  var i=0; (function step(){ if(i>=verifyItems.length){ verifyRunning=false; renderComm(); return; }
+    verifyItems[i].s=evalVerify(verifyItems[i].k); renderComm(); i++; setTimeout(step,320); })(); }
+function reportHTML(){ var d=new Date();
+  var found=commDevices.filter(function(x){return x.found;}).length, addr=commDevices.filter(function(x){return x.status==='addr';}).length;
+  var vpass=verifyItems.filter(function(v){return v.s==='pass';}).length;
+  return '<div class="rh">Commissioning Report</div><b>Project:</b> FanOS Pro Digital Twin Demo<br><b>Date:</b> '+d.toLocaleString()+
+    '<br><b>Controller:</b> AAEON UP 7000 Edge · FanOS Pro 1.4<br><b>Devices found:</b> '+found+' / '+commDevices.length+
+    '<br><b>Addresses assigned:</b> '+addr+'<br><b>Bus A health:</b> '+(busHealth.A?busHealth.A.found+' dev · '+busHealth.A.avg+' ms · CRC '+busHealth.A.crc:'not scanned')+
+    '<br><b>Bus B health:</b> '+(busHealth.B?busHealth.B.found+' dev · '+busHealth.B.avg+' ms · CRC '+busHealth.B.crc:'not scanned')+
+    '<br><b>Verification:</b> '+vpass+' / '+verifyItems.length+' passed<br><b>Technician notes:</b> ____________________________'; }
+function htag(s){ return s==='GOOD'?'good':(s==='WARNING'?'warn':'fault'); }
+function busCard(b){ var h=busHealth[b]; if(!h) return '<div class="bcard"><div class="bt">RS-485 Bus '+b+'</div><div class="br"><span class="k">Status</span><span class="v">— run scan —</span></div></div>';
+  return '<div class="bcard"><div class="bt">RS-485 Bus '+b+'</div>'+
+    '<div class="br"><span class="k">Devices found</span><span class="v">'+h.found+'</span></div>'+
+    '<div class="br"><span class="k">Avg response</span><span class="v">'+h.avg+' ms</span></div>'+
+    '<div class="br"><span class="k">CRC errors</span><span class="v">'+h.crc+'</span></div>'+
+    '<div class="br"><span class="k">Termination</span><span class="v tag2 '+htag(h.term)+'">'+h.term+'</span></div>'+
+    '<div class="br"><span class="k">Bias</span><span class="v tag2 '+htag(h.bias)+'">'+h.bias+'</span></div>'+
+    '<div class="br"><span class="k">Shield</span><span class="v tag2 '+htag(h.shield)+'">'+h.shield+'</span></div></div>'; }
+function renderComm(){ if(!commOpen)return;
+  var html='<h3>Commissioning · FanOS Pro</h3><div class="csub">Start-up &amp; device discovery for a new HVLS control system.</div>';
+  html+='<h4>System Scan</h4><div class="cprog"><i style="width:'+scanProgress+'%"></i></div>';
+  html+='<button class="cbtn" data-act="scan"'+(scanState==='scanning'?' disabled':'')+'>'+(scanState==='scanning'?'Scanning RS-485…':(scanState==='done'?'Re-scan RS-485':'Scan RS-485'))+'</button>';
+  html+='<h4>Discovered Devices'+(scanState==='done'?' · '+commDevices.filter(function(d){return d.found;}).length:'')+'</h4>';
+  html+='<div class="cwarn'+(dupWarn?' show':'')+'">Duplicate Modbus address detected.</div>';
+  var any=false;
+  commDevices.forEach(function(d,i){ if(!d.found)return; any=true;
+    html+='<div class="dev"><div class="dh"><div><span class="dn">'+d.name+'</span><span class="dbus">Bus '+d.bus+'</span></div>'+
+      '<span class="dst '+(d.status==='addr'?'addr':'found')+'">'+(d.status==='addr'?'ADDRESSED':'FOUND')+'</span></div>'+
+      '<div class="dmeta"><span class="k">Model</span><span class="v">'+d.model+'</span><span class="k">Firmware</span><span class="v">'+d.fw+'</span>'+
+      '<span class="k">Address</span><span class="v">'+d.cur+'</span><span class="k">Resp</span><span class="v">'+d.resp+' ms</span>'+
+      '<span class="k">CRC err</span><span class="v">'+d.crc+'</span><span class="k">Status</span><span class="v">'+(d.status==='addr'?'Addressed':'Online')+'</span></div>'+
+      '<div class="addr-set"><button class="step" data-act="dn" data-dev="'+i+'">−</button><span class="num">'+d.prop+'</span><button class="step" data-act="up" data-dev="'+i+'">+</button>'+
+      '<button class="apply" data-act="apply" data-dev="'+i+'">Apply</button></div>'+
+      '<div class="dactions"><button class="mini id" data-act="id" data-dev="'+i+'">Identify Device</button></div></div>'; });
+  if(!any) html+='<div class="csub">No devices yet — run a scan to discover the bus.</div>';
+  html+='<h4>Bus Health</h4><div class="bushealth">'+busCard('A')+busCard('B')+'</div>';
+  html+='<h4>Final Verification</h4>';
+  if(verifyBlocked) html+='<div class="cwarn show">Verification blocked: fire alarm input active.</div>';
+  verifyItems.forEach(function(v){ html+='<div class="vrow"><span class="k">'+v.k+'</span><span class="vstat '+v.s+'">'+(v.s==='pass'?'PASS':(v.s==='warn'?'WARNING':'WAITING'))+'</span></div>'; });
+  html+='<button class="cbtn sec" data-act="verify"'+(verifyRunning?' disabled':'')+'>Run Verification</button>';
+  html+='<h4>Commissioning Report</h4><button class="cbtn sec" data-act="report">Generate Report</button>';
+  html+='<div id="commReport" class="'+(reportShown?'show':'')+'">'+(reportShown?reportHTML():'')+'</div>';
+  commEl.innerHTML=html; }
+commEl.onclick=function(e){ var t=e.target.closest?e.target.closest('[data-act]'):null; if(!t)return;
+  var act=t.dataset.act, di=t.dataset.dev!==undefined?+t.dataset.dev:-1;
+  if(act==='scan') startScan(); else if(act==='up') bumpAddr(di,1); else if(act==='dn') bumpAddr(di,-1);
+  else if(act==='apply') applyAddr(di); else if(act==='id') identify(di); else if(act==='verify') runVerify();
+  else if(act==='report'){ reportShown=true; renderComm(); } };
+commBtn.onclick=function(){ commOpen=!commOpen; commEl.classList.toggle('show',commOpen); commBtn.classList.toggle('on',commOpen); if(commOpen) renderComm(); };
+
+/* ================= Phase 8: Facility View & Zone Layout ================= */
+// --- 3D: airflow rings under each fan (intensity follows rpm; off when stopped/faulted/fire) ---
+var airflow=new THREE.Group(); scene.add(airflow); var fanRings=[];
+farmFans.forEach(function(f){ var set=[]; for(var k=0;k<3;k++){
+  var ring=new THREE.Mesh(new THREE.RingGeometry(1.5,1.95,44),
+    new THREE.MeshBasicMaterial({color:0x9bd4ff,transparent:true,opacity:0,side:THREE.DoubleSide,toneMapped:false,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2; ring.position.set(f.fan.x,f.fan.y-2.4,f.fan.z); airflow.add(ring); set.push(ring); }
+  fanRings.push(set); });
+
+// --- 3D: ghosted future cabinets (non-functional, shows scalability) ---
+(function(){ var gm=new THREE.MeshStandardMaterial({color:0x2a3a4a,transparent:true,opacity:0.12,roughness:1,metalness:0,depthWrite:false});
+  [[20,0,2],[26,0,2]].forEach(function(p){ var g=new THREE.Mesh(new THREE.BoxGeometry(16,20,8),gm); g.position.set(p[0],p[1],p[2]); scene.add(g); }); })();
+
+// --- facility zones reference EXISTING farmFans (no duplicate state) ---
+var FZONES=[ {id:'A',name:'Production',fans:[0,1]}, {id:'B',name:'Shipping',fans:[2]}, {id:'C',name:'Staging',fans:[3]} ];
+var zoneSpeedIdx={A:1,B:1,C:1}, SPEEDS=[40,70,100], SPEEDLBL=['Low','Med','High'];
+function zStat(z){ var fs=z.fans.map(function(i){return farmFans[i];});
+  var flt=fs.filter(function(f){return f.fault;}).length, on=fs.filter(function(f){return f.on;}).length;
+  var onfs=fs.filter(function(f){return f.on&&!f.fault;}); var avg=onfs.length?Math.round(onfs.reduce(function(a,f){return a+f.cmd;},0)/onfs.length):0;
+  var status= flt?'flt': (fireAlarm&&on)?'stop' : on?'run':'idle';
+  var temp=Math.round(70 + avg*0.12 + flt*4); var mode= !on||fireAlarm?'Off':(avg>=80?'Cooling':'Destratify');
+  return {flt:flt,on:on,n:fs.length,avg:avg,status:status,temp:temp,mode:mode}; }
+
+// --- camera presets ---
+var FPRESETS=[ {n:'Overview',t:[-1,5,-10],r:120,th:0.6,ph:0.72},{n:'Production',t:[-20,7,-12],r:64,th:0.95,ph:0.96},
+  {n:'Shipping',t:[18,7,-4],r:48,th:0.30,ph:0.98},{n:'Staging',t:[18,7,-20],r:52,th:0.72,ph:0.98},
+  {n:'Cabinet',t:[0,1,0],r:34,th:0.48,ph:1.22},{n:'VFDs',t:[-1,-2,-10],r:72,th:0.75,ph:1.2},{n:'Fans',t:[0,12,-12],r:86,th:0.6,ph:0.92} ];
+
+// --- marker click → select related 3D fan ---
+function selectFan(i){ var f=farmFans[i]; vfdFlash[i]={color:0x2196f3,until:performance.now()+1600};
+  tracePulse(busPath[f.chain===0?'A':'B'],0x2196f3); showInfo('vfd'); animTarget=f.fan.clone(); highlightDashRow({kind:'vfd',idx:i}); }
+function identifyZone(z){ z.fans.forEach(function(i){ var f=farmFans[i]; vfdFlash[i]={color:0x2196f3,until:performance.now()+1700};
+  tracePulse(busPath[f.chain===0?'A':'B'],0x2196f3); }); }
+
+// --- floorplan canvas ---
+var facilityEl=document.getElementById('facility'), facilityBtn=document.getElementById('facilityBtn');
+var facilityOpen=false, facilityBuilt=false, facilityPrev=null, facAcc=0, floorCv=null, floorCtx=null, markerHit=[];
+var FW=600, FH=360, FPAD=30;
+function wx(x){ return FPAD + (x-(-26))/(24-(-26))*(FW-2*FPAD); }
+function wy(z){ return FPAD + ((-26)-z)/((-26)-(12))*(FH-2*FPAD); }
+function markColor(f,i){ if(f.fault) return '#ff3b30'; if(f.on&&!fireAlarm) return '#28c840'; return '#7d8794'; }
+function drawFloor(){ if(!floorCtx)return; var g=floorCtx; g.clearRect(0,0,FW,FH);
+  g.fillStyle='#0a1320'; g.fillRect(0,0,FW,FH);
+  // zones (translucent)
+  function zone(x0,z0,x1,z1,col,label){ var ax=wx(x0),ay=wy(z0),bx=wx(x1),by=wy(z1);
+    g.fillStyle=col; g.fillRect(Math.min(ax,bx),Math.min(ay,by),Math.abs(bx-ax),Math.abs(by-ay));
+    g.fillStyle='rgba(255,255,255,.5)'; g.font='600 12px system-ui,sans-serif'; g.fillText(label,Math.min(ax,bx)+8,Math.min(ay,by)+18); }
+  zone(-26,2,-2,-26,'rgba(40,200,64,.07)','ZONE A · PRODUCTION');
+  zone(-2,2,24,-8,'rgba(33,150,243,.07)','ZONE B · SHIPPING');
+  zone(-2,-8,24,-26,'rgba(230,172,0,.07)','ZONE C · STAGING');
+  // building outline
+  g.strokeStyle='#3a4d63'; g.lineWidth=2; g.strokeRect(FPAD,FPAD,FW-2*FPAD,FH-2*FPAD);
+  // columns (grid of small squares)
+  g.fillStyle='rgba(150,170,190,.25)';
+  for(var cx=-18;cx<=18;cx+=12){ for(var cz=-22;cz<=8;cz+=10){ var px=wx(cx),pz=wy(cz); g.fillRect(px-2,pz-2,4,4); } }
+  // aisles (light dashed)
+  g.strokeStyle='rgba(150,170,190,.12)'; g.setLineDash([6,6]); g.lineWidth=1;
+  [-8,8].forEach(function(ax){ g.beginPath(); g.moveTo(wx(ax),FPAD); g.lineTo(wx(ax),FH-FPAD); g.stroke(); }); g.setLineDash([]);
+  // dock doors (front/bottom wall)
+  g.fillStyle='#4a5d73'; [-14,-6,2,10].forEach(function(dx){ var px=wx(dx); g.fillRect(px-12,FH-FPAD-3,24,6); });
+  g.fillStyle='rgba(180,200,220,.4)'; g.font='9px system-ui'; g.fillText('DOCK DOORS',wx(-14)-10,FH-FPAD+16);
+  // VFD locations (small squares near fans)
+  g.fillStyle='#2196f3'; farmFans.forEach(function(f){ g.fillRect(wx(f.vfd.x)-3,wy(f.vfd.z)-3,6,6); });
+  // FanOS cabinet
+  var cbx=wx(0),cbz=wy(0); g.fillStyle='#0a1929'; g.strokeStyle='#2196f3'; g.lineWidth=2;
+  g.fillRect(cbx-14,cbz-10,28,20); g.strokeRect(cbx-14,cbz-10,28,20);
+  g.fillStyle='#cfe6fb'; g.font='600 9px system-ui'; g.fillText('FanOS Pro',cbx-13,cbz+3);
+  // operator station
+  var opx=wx(13),opz=wy(8); g.fillStyle='#143b5c'; g.strokeStyle='#3a87c7'; g.lineWidth=1.5;
+  g.fillRect(opx-9,opz-6,18,12); g.strokeRect(opx-9,opz-6,18,12);
+  g.fillStyle='rgba(180,200,220,.7)'; g.font='8px system-ui'; g.fillText('OPERATOR',opx-13,opz+16);
+  // ghost future cabinets
+  g.strokeStyle='rgba(150,170,190,.25)'; g.setLineDash([4,4]); g.lineWidth=1.5;
+  [[20,'Cabinet 2 — Future'],[24,'Cabinet 3 — Future']].forEach(function(gc){ var gx=wx(gc[0]),gz=wy(2);
+    g.strokeRect(gx-11,gz-9,22,18); g.fillStyle='rgba(160,180,200,.35)'; g.font='7px system-ui'; }); g.setLineDash([]);
+  // fan markers
+  markerHit=[];
+  farmFans.forEach(function(f,i){ var px=wx(f.fan.x),pz=wy(f.fan.z), col=markColor(f,i);
+    if(i===pollIdx&&(f.on||f.fault)&&!fireAlarm){ var pr=10+6*Math.abs(Math.sin(performance.now()*0.005));
+      g.strokeStyle='rgba(33,150,243,.7)'; g.lineWidth=2; g.beginPath(); g.arc(px,pz,pr,0,6.3); g.stroke(); }
+    g.beginPath(); g.arc(px,pz,9,0,6.3); g.fillStyle=col; g.fill(); g.strokeStyle='rgba(0,0,0,.5)'; g.lineWidth=2; g.stroke();
+    g.fillStyle='rgba(230,240,250,.85)'; g.font='600 10px system-ui'; g.fillText(f.name.replace('Fan ',''),px-9,pz-13);
+    markerHit.push({x:px,y:pz,r:14,i:i}); });
+}
+function buildFacility(){ if(facilityBuilt)return; facilityBuilt=true;
+  facilityEl.innerHTML='<h3>Facility · FanOS Pro</h3><div class="csub">Warehouse-level control · live fan state, faults &amp; airflow.</div>'+
+    '<div id="floorWrap"><canvas id="floorCanvas" width="600" height="360"></canvas></div>'+
+    '<h4>Site Status</h4><div class="fstat" id="fstat"></div>'+
+    '<h4>Camera</h4><div class="fpre" id="fpre"></div>'+
+    '<h4>Zones</h4><div id="zones"></div>';
+  floorCv=document.getElementById('floorCanvas'); floorCtx=floorCv.getContext('2d');
+  document.getElementById('fpre').innerHTML=FPRESETS.map(function(p,i){ return '<button class="pc" data-pre="'+i+'">'+p.n+'</button>'; }).join('');
+  floorCv.addEventListener('click',function(e){ var r=floorCv.getBoundingClientRect(); var sx=FW/r.width, sy=FH/r.height;
+    var cx=(e.clientX-r.left)*sx, cy=(e.clientY-r.top)*sy;
+    for(var m=0;m<markerHit.length;m++){ var h=markerHit[m]; if((cx-h.x)*(cx-h.x)+(cy-h.y)*(cy-h.y)<=h.r*h.r){ selectFan(h.i); gotoPreset(FPRESETS[0]); break; } } });
+}
+function renderFacilityStats(){ if(!facilityBuilt)return;
+  var running=farmFans.filter(function(f){return f.on&&!f.fault&&!fireAlarm;}).length;
+  var faulted=farmFans.filter(function(f){return f.fault;}).length;
+  var actZones=FZONES.filter(function(z){return z.fans.some(function(i){return farmFans[i].on;});}).length;
+  var cfm=0; farmFans.forEach(function(f){ if(f.on&&!f.fault&&!fireAlarm) cfm+=Math.round(f.rpm/MAXRPM*220000); });
+  var net=(faulted>0?'Degraded':'Online');
+  var S=[ ['Site status', fireAlarm?'FIRE':(faulted?'Fault':'Normal'), fireAlarm?'bad':(faulted?'warn':'ok')],
+    ['Active zones', actZones+' / '+FZONES.length, ''],
+    ['Fans running', running+' / '+farmFans.length, running?'ok':''],
+    ['Fans faulted', ''+faulted, faulted?'bad':'ok'],
+    ['Fire alarm', fireAlarm?'ACTIVE':'Normal', fireAlarm?'bad':'ok'],
+    ['Network', net, faulted?'warn':'ok'],
+    ['Total airflow', '≈ '+cfm.toLocaleString()+' CFM', ''],
+    ['Energy mode', 'Balanced', ''] ];
+  document.getElementById('fstat').innerHTML=S.map(function(s){ return '<div class="sc"><div class="k">'+s[0]+'</div><div class="v '+s[2]+'">'+s[1]+'</div></div>'; }).join('');
+  document.getElementById('zones').innerHTML=FZONES.map(function(z){ var st=zStat(z);
+    var lbl={run:'RUNNING',idle:'IDLE',flt:'FAULT',stop:'STOPPED'}[st.status];
+    return '<div class="zcard"><div class="zh"><div class="zn">Zone '+z.id+'<span class="zt">'+z.name+'</span></div>'+
+      '<span class="zstat '+st.status+'">'+lbl+'</span></div>'+
+      '<div class="zmeta"><span class="k">Fans</span><span class="v">'+st.n+'</span><span class="k">Avg speed</span><span class="v">'+st.avg+'%</span>'+
+      '<span class="k">Temp</span><span class="v">'+st.temp+'°F</span><span class="k">Airflow</span><span class="v">'+st.mode+'</span>'+
+      '<span class="k">Faults</span><span class="v">'+st.flt+'</span><span class="k">Status</span><span class="v">'+(st.on?'Online':'Stopped')+'</span></div>'+
+      '<div class="zctl"><button class="start" data-z="'+z.id+'" data-act="start">Start</button><button class="stop" data-z="'+z.id+'" data-act="stop">Stop</button>'+
+      '<button data-z="'+z.id+'" data-act="speed">Speed: '+SPEEDLBL[zoneSpeedIdx[z.id]]+'</button><button class="idf" data-z="'+z.id+'" data-act="idz">Identify</button></div></div>'; }).join('');
+}
+facilityEl.addEventListener('click',function(e){ var t=e.target.closest?e.target.closest('[data-act],[data-pre]'):null; if(!t)return;
+  if(t.dataset.pre!==undefined){ gotoPreset(FPRESETS[+t.dataset.pre]);
+    facilityEl.querySelectorAll('.pc').forEach(function(o){o.classList.remove('on');}); t.classList.add('on'); return; }
+  var z=FZONES.filter(function(zz){return zz.id===t.dataset.z;})[0]; if(!z)return; var act=t.dataset.act;
+  if(act==='start') z.fans.forEach(function(i){ farmFans[i].on=true; });
+  else if(act==='stop') z.fans.forEach(function(i){ farmFans[i].on=false; });
+  else if(act==='speed'){ zoneSpeedIdx[z.id]=(zoneSpeedIdx[z.id]+1)%3; var sp=SPEEDS[zoneSpeedIdx[z.id]]; z.fans.forEach(function(i){ farmFans[i].cmd=sp; }); }
+  else if(act==='idz') identifyZone(z);
+  renderFacilityStats(); drawFloor(); });
+facilityBtn.onclick=function(){ facilityOpen=!facilityOpen; facilityEl.classList.toggle('show',facilityOpen); facilityBtn.classList.toggle('on',facilityOpen);
+  if(facilityOpen){ buildFacility(); renderFacilityStats(); drawFloor();
+    var diagP=document.getElementById('diag'); if(diagP)diagP.classList.remove('show');
+    if(commEl)commEl.classList.remove('show'); commOpen=false; commBtn.classList.remove('on');
+    var dashP=document.getElementById('dash'); if(dashP)dashP.classList.remove('show');
+    facilityPrev={t:target.clone(),s:{radius:sph.radius,theta:sph.theta,phi:sph.phi}}; gotoPreset(FPRESETS[0]);
+    facilityEl.querySelectorAll('.pc').forEach(function(o,i){o.classList.toggle('on',i===0);}); }
+  else if(facilityPrev){ gotoPreset({t:[facilityPrev.t.x,facilityPrev.t.y,facilityPrev.t.z],r:facilityPrev.s.radius,th:facilityPrev.s.theta,ph:facilityPrev.s.phi}); } };
+
 /* ---------------- Hint ---------------- */
 var hintEl=document.getElementById('hint'),hintGone=false;
 function hideHint(){ if(!hintGone){ hintGone=true; hintEl.style.opacity=0;
@@ -1239,6 +1569,8 @@ function loop(){
       L.flt.material.emissive.setHex(f.fault?0xff3b30:0x000000);
       L.flt.material.emissiveIntensity=f.fault?(0.4+0.6*Math.abs(Math.sin(now*0.02))):0.0;
     }
+    var VF=vfdFlash[i]; if(VF){ if(now<VF.until){ driveMeshes[i].material.emissive.setHex(VF.color);
+        driveMeshes[i].material.emissiveIntensity=0.4+0.6*Math.abs(Math.sin(now*0.018)); } else { delete vfdFlash[i]; } }
   }
   pollAcc+=dt; if(pollAcc>250){ pollAcc=0; pollIdx=(pollIdx+1)%farmFans.length; }
   for(var q=0;q<cabLeds.length;q++){ var Ld=cabLeds[q], t=now*0.001+Ld.ph, v;
@@ -1253,6 +1585,19 @@ function loop(){
     Ld.mat.emissiveIntensity=v;
   }
   fireGlow.material.opacity=fireAlarm?(0.20+0.16*Math.abs(Math.sin(now*0.004))):0;
+  for(var gf=genFlash.length-1;gf>=0;gf--){ var GF=genFlash[gf];
+    if(now<GF.until){ var gk=0.4+0.6*Math.abs(Math.sin(now*0.018)); GF.meshes.forEach(function(m){ if(!m||!m.material)return;
+        if(!m.userData._fclone){ m.material=m.material.clone(); m.userData._fclone=true; }
+        if(m.material.emissive){ m.material.emissive.setHex(GF.color); m.material.emissiveIntensity=gk; } }); }
+    else { GF.meshes.forEach(function(m){ if(m&&m.material&&m.material.emissive){ m.material.emissive.setHex(0x000000); m.material.emissiveIntensity=0; } }); genFlash.splice(gf,1); } }
+  for(var tpi=tracePulses.length-1;tpi>=0;tpi--){ var TP=tracePulses[tpi]; TP.t+=dt*0.0009;
+    if(TP.t>=1){ SYS.comms.remove(TP.mesh); tracePulses.splice(tpi,1); }
+    else { TP.mesh.position.copy(pointAt({points:TP.pts,segs:TP.segs,total:TP.total},TP.t)); } }
+  for(var bk in badges){ badges[bk].quaternion.copy(camera.quaternion); }
+  for(var ai=0;ai<farmFans.length;ai++){ var af=farmFans[ai], inten=(af.on&&!af.fault&&!fireAlarm)?Math.min(1,af.rpm/MAXRPM):0;
+    for(var rk=0;rk<3;rk++){ var rg=fanRings[ai][rk], ph=((now*0.0004)+(rk/3))%1, sc=1+ph*3.2;
+      rg.scale.set(sc,sc,sc); rg.material.opacity=inten*0.16*(1-ph); } }
+  if(facilityOpen){ facAcc+=dt; if(facAcc>250){ facAcc=0; drawFloor(); renderFacilityStats(); } }
   for(var pz=0;pz<pulses.length;pz++){ var P=pulses[pz];
     for(var pc=0;pc<P.count;pc++){ var fr=((now*0.001*P.speed)+P.off+pc/P.count)%1; P.meshes[pc].position.copy(pointAt(P,fr)); } }
   hmiAcc+=dt; if(hmiAcc>340){ hmiAcc=0; drawMasterHMI(masterHMI); drawDoorHMI(doorHMI);
