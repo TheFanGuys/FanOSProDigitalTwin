@@ -177,6 +177,57 @@
   .svtoggle button{border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-size:12px;font-weight:700;padding:8px 12px;border-radius:9px;cursor:pointer;}
   .svtoggle button.on{border-color:var(--blue);color:#cfe6fb;background:rgba(33,150,243,.14);}
   .svempty{font-size:12px;color:var(--dim);padding:10px 2px;}
+  #handoff{position:fixed;left:10px;right:10px;bottom:64px;z-index:11;display:none;max-height:74vh;overflow:auto;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:14px;max-width:600px;margin:0 auto;box-shadow:0 12px 44px rgba(0,0,0,.55);}
+  #handoff.show{display:block;}
+  #handoff h3{font-size:14px;margin:2px 0 4px;color:#fff;}
+  #hotabs{display:flex;gap:6px;margin:10px 0 12px;overflow-x:auto;scrollbar-width:none;}
+  #hotabs::-webkit-scrollbar{display:none;}
+  #hotabs .tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-size:12px;font-weight:700;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  #hotabs .tab.on{border-color:var(--blue);color:#cfe6fb;background:rgba(33,150,243,.14);}
+  .hkv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12px;margin-top:6px;}
+  .hkv .k{color:var(--dim);} .hkv .v{color:var(--txt);text-align:right;font-variant-numeric:tabular-nums;}
+  .hsec{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--dim);margin:16px 0 7px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:5px;}
+  .iorow{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:9px 11px;margin:6px 0;font-size:12px;}
+  .iorow .ion{color:#fff;font-weight:600;} .iorow .iov{color:var(--txt);font-variant-numeric:tabular-nums;}
+  .iotag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.3px;}
+  .iotag.inp{color:#9bd0ff;background:rgba(33,150,243,.12);} .iotag.outp{color:#ffd27a;background:rgba(230,172,0,.12);} .iotag.mon{color:#9fe6c0;background:rgba(67,209,122,.12);}
+  .hnote{font-size:11px;color:var(--dim);font-style:italic;margin-top:8px;}
+  .firebox{border:1px solid #5a4420;background:rgba(230,172,0,.08);border-radius:11px;padding:13px;font-size:13px;line-height:1.6;color:#ecd9b0;margin-bottom:10px;}
+  #hoReport{width:100%;min-height:210px;border:1px solid var(--line);background:#0b1622;border-radius:10px;padding:11px;color:#cfe6fb;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;margin-top:10px;white-space:pre;display:none;}
+  #hoReport.show{display:block;}
+  .hcopied{font-size:11px;color:var(--green);margin-top:6px;display:none;} .hcopied.show{display:block;}
+  #templates{position:fixed;left:10px;right:10px;bottom:64px;z-index:11;display:none;max-height:74vh;overflow:auto;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;padding:14px;max-width:600px;margin:0 auto;box-shadow:0 12px 44px rgba(0,0,0,.55);}
+  #templates.show{display:block;}
+  #templates h3{font-size:14px;margin:2px 0 4px;color:#fff;}
+  #tptabs{display:flex;gap:6px;margin:10px 0 12px;overflow-x:auto;scrollbar-width:none;}
+  #tptabs::-webkit-scrollbar{display:none;}
+  #tptabs .tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-size:12px;font-weight:700;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  #tptabs .tab.on{border-color:var(--blue);color:#cfe6fb;background:rgba(33,150,243,.14);}
+  .tplval{font-size:12px;line-height:1.5;color:#bcd4ea;background:rgba(33,150,243,.06);border:1px solid rgba(33,150,243,.2);border-radius:10px;padding:10px 12px;margin-bottom:10px;}
+  .tcard{border:1px solid var(--line);background:var(--panel2);border-radius:11px;padding:11px 12px;margin:8px 0;cursor:pointer;}
+  .tcard.sel{border-color:var(--blue);background:rgba(33,150,243,.10);}
+  .tcard .tch{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .tcard .tcn{font-size:13px;font-weight:700;color:#fff;}
+  .cmp{font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.3px;white-space:nowrap;}
+  .cmp.exc{color:var(--green);background:rgba(67,209,122,.14);} .cmp.good{color:#9bd0ff;background:rgba(33,150,243,.14);}
+  .cmp.verify{color:#ffd27a;background:rgba(230,172,0,.14);} .cmp.no{color:#ff6b6b;background:rgba(255,59,48,.14);}
+  .applybar{border:1px solid var(--blue);background:rgba(33,150,243,.10);border-radius:11px;padding:11px 12px;margin-bottom:10px;}
+  .applybar .ab1{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .applybar .abn{font-size:13px;font-weight:700;color:#cfe6fb;}
+  .applybar .abtn{width:100%;margin-top:9px;border:1px solid var(--blue);background:rgba(33,150,243,.2);color:#eaf4ff;font-size:13px;font-weight:700;padding:12px;border-radius:10px;cursor:pointer;}
+  .applybar .abtn:active{transform:scale(.98);}
+  .applybar .abmsg{font-size:11.5px;color:var(--green);margin-top:8px;}
+  .applybar .abmsg.warn{color:#ffd27a;}
+  .regmap{margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:9px;}
+  .regmap .rmh{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);margin-bottom:7px;}
+  .regrow{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 10px;margin:6px 0;}
+  .regrow .r1{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .regrow .rfn{font-size:12.5px;font-weight:700;color:#fff;} .regrow .rreg{font-size:11px;font-family:ui-monospace,monospace;color:#9fd3ff;}
+  .regrow .r2{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;}
+  .regrow .rc{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--txt);}
+  .regrow .rdesc{font-size:11px;color:var(--dim);margin-top:5px;}
+  .tkv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px;margin-top:8px;}
+  .tkv .k{color:var(--dim);} .tkv .v{color:var(--txt);text-align:right;}
   #hdr svg{width:40px;height:40px;flex:0 0 auto;}
   #hdr .wm{line-height:1;}
   #hdr .wm .nm{font-size:17px;font-weight:800;letter-spacing:.2px;}
@@ -341,6 +392,8 @@
 <div id="comm"></div>
 <div id="facility"></div>
 <div id="service"></div>
+<div id="handoff"></div>
+<div id="templates"></div>
 <div id="demo"></div>
 
 <div id="controls">
@@ -354,6 +407,8 @@
   <button class="btn" id="facilityBtn">Facility</button>
   <button class="btn" id="serviceBtn">Service</button>
   <button class="btn" id="demoBtn">Demo</button>
+  <button class="btn" id="handoffBtn">Handoff</button>
+  <button class="btn" id="templatesBtn">Templates</button>
   <button class="btn" id="resetBtn">Reset</button>
 </div>
 
@@ -1613,6 +1668,8 @@ function closeAllPanels(except){
   if(except!=='layers'){ layOpen=false; layEl.classList.remove('show'); layersBtn.classList.remove('on'); }
   if(except!=='facility'){ if(facilityOpen) restoreFacilityCam(); facilityOpen=false; facilityEl.classList.remove('show'); facilityBtn.classList.remove('on'); }
   if(except!=='service'){ if(typeof serviceOpen!=='undefined'){ serviceOpen=false; serviceEl.classList.remove('show'); serviceBtn.classList.remove('on'); } }
+  if(except!=='handoff'){ if(typeof handoffOpen!=='undefined'){ handoffOpen=false; handoffEl.classList.remove('show'); handoffBtn.classList.remove('on'); } }
+  if(except!=='templates'){ if(typeof templatesOpen!=='undefined'){ templatesOpen=false; templatesEl.classList.remove('show'); templatesBtn.classList.remove('on'); } }
 }
 facilityBtn.onclick=function(){ facilityOpen=!facilityOpen;
   if(facilityOpen){ closeAllPanels('facility'); buildFacility(); renderFacilityStats(); drawFloor();
@@ -1733,6 +1790,212 @@ serviceEl.addEventListener('click',function(e){ var t=e.target.closest?e.target.
 serviceBtn.onclick=function(){ serviceOpen=!serviceOpen;
   if(serviceOpen){ if(typeof demoActive!=='undefined'&&demoActive)demoExit(); closeAllPanels('service'); buildService(); renderService(); serviceEl.classList.add('show'); serviceBtn.classList.add('on'); }
   else { serviceEl.classList.remove('show'); serviceBtn.classList.remove('on'); } };
+
+/* ================= Phase 12: Multi-Brand Template Mode ================= */
+var templatesEl=document.getElementById('templates'), templatesBtn=document.getElementById('templatesBtn');
+var templatesOpen=false, tplTab='fan', tplBuilt=false, tplSel={tab:null,idx:-1}, tplMsg='', tplMsgWarn=false;
+
+var FAN_TPL=[
+ {name:'Generic 24 ft HVLS',type:'HVLS ceiling fan',size:'24 ft (7.3 m)',ctrl:'VFD speed',vfd:'Yes',volt:'480 VAC 3Ø',comm:'Modbus via VFD',cp:'Run, Speed',sp:'Freq, Current, Fault',compat:'Excellent'},
+ {name:'Generic 18 ft HVLS',type:'HVLS ceiling fan',size:'18 ft (5.5 m)',ctrl:'VFD speed',vfd:'Yes',volt:'480 VAC 3Ø',comm:'Modbus via VFD',cp:'Run, Speed',sp:'Freq, Current, Fault',compat:'Excellent'},
+ {name:'Generic 12 ft HVLS',type:'HVLS ceiling fan',size:'12 ft (3.7 m)',ctrl:'VFD speed',vfd:'Yes',volt:'230 / 480 VAC 3Ø',comm:'Modbus via VFD',cp:'Run, Speed',sp:'Freq, Current, Fault',compat:'Excellent'},
+ {name:'Basket fan',type:'Directional basket fan',size:'5–8 ft',ctrl:'VFD or relay',vfd:'Optional',volt:'230 VAC 1/3Ø',comm:'Modbus / on-off',cp:'Run, Speed*',sp:'Status',compat:'Good'},
+ {name:'Barrel fan',type:'Mobile barrel fan',size:'24–36 in',ctrl:'On/off (relay)',vfd:'No',volt:'120 / 230 VAC 1Ø',comm:'Relay channel',cp:'On / Off',sp:'—',compat:'Good'},
+ {name:'Wall exhaust fan',type:'Wall exhaust',size:'24–48 in',ctrl:'On/off (relay)',vfd:'No',volt:'230 / 480 VAC',comm:'Relay channel',cp:'On / Off',sp:'—',compat:'Good'},
+ {name:'Roof exhaust fan',type:'Upblast roof exhaust',size:'Belt / direct drive',ctrl:'On/off (relay → starter)',vfd:'No',volt:'480 VAC 3Ø',comm:'Relay → starter',cp:'On / Off',sp:'—',compat:'Good'},
+ {name:'Powered louver',type:'Motorized louver',size:'—',ctrl:'On/off (relay)',vfd:'No',volt:'120 / 230 VAC',comm:'Relay channel',cp:'Open / Close',sp:'—',compat:'Good'} ];
+var VFD_TPL=[
+ {name:'Invertek-style VFD',proto:'Modbus RTU',baud:'9600 / 19200',par:'None / Even',regs:'Run, Speed, Freq, Current, Fault',run:'Holding-register bit',spd:'Holding register (0–full)',rst:'Yes',ro:'Freq, Current, DC bus, Temp',notes:'Optidrive-class mapping',compat:'Excellent',reg:{run:1,spd:2,freq:6,cur:8,flt:22,sta:5,rst:1,full:'5000 = 50 Hz'}},
+ {name:'Schneider-style VFD',proto:'Modbus RTU',baud:'19200',par:'Even',regs:'CMD, Speed, RFRD, LCR, Fault',run:'Command word',spd:'Speed reference',rst:'Yes',ro:'Freq, Current, Status',notes:'Altivar-class mapping',compat:'Excellent',reg:{run:8501,spd:8602,freq:3202,cur:3204,flt:7121,sta:3201,rst:8501,full:'100% = LFRD'}},
+ {name:'Yaskawa-style VFD',proto:'Modbus RTU',baud:'9600 / 19200',par:'None',regs:'Run, Freq ref, Output, Current, Fault',run:'Register 0x0001',spd:'Freq ref 0x0002',rst:'Yes',ro:'Output freq, Current, Status',notes:'V1000 / GA-class mapping',compat:'Excellent',reg:{run:1,spd:2,freq:38,cur:39,flt:49,sta:32,rst:1,full:'0.01 Hz'}},
+ {name:'ABB-style VFD',proto:'Modbus RTU',baud:'9600 / 19200',par:'None / Even',regs:'CW, Ref, Act, Current, Fault',run:'Control word',spd:'Reference',rst:'Yes',ro:'Speed, Current, Status word',notes:'ACS-class profile',compat:'Excellent',reg:{run:1,spd:2,freq:103,cur:104,flt:401,sta:3,rst:1,full:'20000 = 100%'}},
+ {name:'Danfoss-style VFD',proto:'Modbus RTU',baud:'9600 / 19200',par:'Even',regs:'CTW, MAV, Output, Current, Alarm',run:'Control word',spd:'Reference (MAV)',rst:'Yes',ro:'Freq, Current, Status',notes:'FC / VLT-class mapping',compat:'Excellent',reg:{run:50010,spd:50011,freq:16310,cur:16314,flt:16450,sta:50012,rst:50010,full:'16384 = 100%'}},
+ {name:'Generic Modbus VFD',proto:'Modbus RTU',baud:'set per drive',par:'set per drive',regs:'User-mapped',run:'Mapped holding register',spd:'Mapped holding register',rst:'If supported',ro:'Mapped read registers',notes:'Verify register map against the manual',compat:'Good',reg:{run:1,spd:2,freq:3,cur:4,flt:5,sta:6,rst:1,full:'scaled'}} ];
+var RELAY_TPL=[
+ {name:'8-channel Modbus relay',type:'Relay output module',ch:'8',comm:'Modbus RTU (RS-485)',ctrl:'Per-channel coils',use:'Exhaust, louvers, on/off loads',compat:'Excellent'},
+ {name:'4-channel Modbus relay',type:'Relay output module',ch:'4',comm:'Modbus RTU (RS-485)',ctrl:'Per-channel coils',use:'Smaller device counts',compat:'Excellent'},
+ {name:'Dry-contact expander',type:'Discrete output',ch:'Varies',comm:'Hardwired from relay',ctrl:'Pilot to starter coil',use:'3Ø loads via motor starter',compat:'Good'} ];
+var SENSOR_TPL=[
+ {name:'Temp / humidity gateway',meas:'Temperature, RH',comm:'Modbus RTU (RS-485)',pts:'2 read',use:'Destratification, comfort',compat:'Excellent'},
+ {name:'Airflow / pressure sensor',meas:'Air velocity, ΔP',comm:'Modbus RTU / 4–20 mA',pts:'1–2 read',use:'Airflow verification',compat:'Good'},
+ {name:'CO₂ / IAQ sensor',meas:'CO₂, VOC',comm:'Modbus RTU (RS-485)',pts:'1–2 read',use:'Exhaust assist / IAQ',compat:'Good'},
+ {name:'Combined sensor gateway',meas:'Temp, RH, CO₂, airflow',comm:'Modbus RTU (RS-485)',pts:'4+ read',use:'Full-facility sensing',compat:'Excellent'} ];
+var PROFILES=[
+ {name:'Manual Speed Control',purpose:'Operator sets fan speed directly',inp:'Dashboard / touchscreen',outp:'VFD speed reference',safe:'Always respects fire-alarm stop',use:'Simple always-on spaces'},
+ {name:'Zone Schedule',purpose:'Run zones on a time schedule',inp:'Controller clock',outp:'VFD run + speed per zone',safe:'Manual override available',use:'Predictable shift patterns'},
+ {name:'Temperature Assist',purpose:'Adjust speed to temperature',inp:'Temp sensor (Bus B)',outp:'VFD speed reference',safe:'Caps to a safe speed range',use:'Seasonal comfort control'},
+ {name:'Dock Door Assist',purpose:'Boost airflow near open docks',inp:'Door status input',outp:'Nearby zone speed',safe:'Returns to baseline on close',use:'Loading-dock buffering'},
+ {name:'Destratification',purpose:'Mix warm ceiling air downward',inp:'Top / bottom temp delta',outp:'Low-speed continuous run',safe:'Low-speed, monitored',use:'High-bay heating savings'},
+ {name:'Exhaust Assist',purpose:'Stage exhaust with airflow / IAQ',inp:'CO₂ / airflow sensor',outp:'Relay exhaust + louver',safe:'Interlocks with louver open',use:'Process / IAQ ventilation'},
+ {name:'Fire Alarm Stop',purpose:'Stop commanded fans on alarm',inp:'Fire-alarm dry contact',outp:'All VFD run = stop',safe:'Software only — NOT a life-safety shutdown',use:'Required monitor interlock'},
+ {name:'Maintenance Lockout',purpose:'Hold a device off for service',inp:'Service-mode selection',outp:'Inhibit run command',safe:'Use a lockable disconnect for true LOTO',use:'Safe servicing of a fan'} ];
+var TPLSETS={fan:FAN_TPL,vfd:VFD_TPL,relay:RELAY_TPL,sensor:SENSOR_TPL,profiles:PROFILES};
+var TPTABS={fan:'Fan Templates',vfd:'VFD Templates',relay:'Relay Devices',sensor:'Sensor Templates',profiles:'Control Profiles'};
+var CMPCLASS={'Excellent':'exc','Good':'good','Needs verification':'verify','Not recommended':'no'};
+
+function regMap(b){ return [
+ {fn:'Run command',reg:b.run,ty:'Coil / Holding',dir:'W',sc:'1 = run',desc:'Start / stop the drive'},
+ {fn:'Speed command',reg:b.spd,ty:'Holding',dir:'W',sc:'0–100% → '+b.full,desc:'Speed reference'},
+ {fn:'Output frequency',reg:b.freq,ty:'Input',dir:'R',sc:'0.1 Hz',desc:'Actual output frequency'},
+ {fn:'Motor current',reg:b.cur,ty:'Input',dir:'R',sc:'0.1 A',desc:'Measured motor current'},
+ {fn:'Fault code',reg:b.flt,ty:'Input',dir:'R',sc:'enum',desc:'Active fault code'},
+ {fn:'Drive status',reg:b.sta,ty:'Input',dir:'R',sc:'bitfield',desc:'Run / ready / fault bits'},
+ {fn:'Reset fault',reg:b.rst,ty:'Coil / Holding',dir:'W',sc:'1 = reset',desc:'Clear a latched fault'} ]; }
+
+function tplCard(t,i,sel){ var cmp=t.compat?'<span class="cmp '+CMPCLASS[t.compat]+'">'+t.compat+'</span>':'';
+  var kv;
+  if(tplTab==='fan') kv=[['Type',t.type],['Size',t.size],['Control',t.ctrl],['VFD required',t.vfd],['Voltage',t.volt],['Comms',t.comm],['Control points',t.cp],['Status points',t.sp]];
+  else if(tplTab==='vfd') kv=[['Protocol',t.proto],['Baud',t.baud],['Parity',t.par],['Registers',t.regs],['Run command',t.run],['Speed ref',t.spd],['Fault reset',t.rst],['Read-only',t.ro],['Notes',t.notes]];
+  else if(tplTab==='relay') kv=[['Type',t.type],['Channels',t.ch],['Comms',t.comm],['Control',t.ctrl],['Typical use',t.use]];
+  else if(tplTab==='sensor') kv=[['Measures',t.meas],['Comms',t.comm],['Points',t.pts],['Typical use',t.use]];
+  else kv=[['Purpose',t.purpose],['Input',t.inp],['Output',t.outp],['Safety',t.safe],['Ideal use',t.use]];
+  var h='<div class="tcard'+(sel?' sel':'')+'" data-tsel="'+i+'"><div class="tch"><div class="tcn">'+t.name+'</div>'+cmp+'</div>'+
+    '<div class="tkv">'+kv.map(function(r){return '<span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span>';}).join('')+'</div>';
+  if(sel&&tplTab==='vfd'){ h+='<div class="regmap"><div class="rmh">Modbus register map (simulated)</div>'+regMap(t.reg).map(function(r){
+    return '<div class="regrow"><div class="r1"><div class="rfn">'+r.fn+'</div><div class="rreg">reg '+r.reg+'</div></div>'+
+      '<div class="r2"><span class="rc">'+r.ty+'</span><span class="rc">'+(r.dir==='W'?'Write':'Read')+'</span><span class="rc">'+r.sc+'</span></div>'+
+      '<div class="rdesc">'+r.desc+'</div></div>'; }).join('')+'</div>'; }
+  return h+'</div>'; }
+
+function currentTpl(){ if(tplSel.tab!==tplTab||tplSel.idx<0)return null; return TPLSETS[tplTab][tplSel.idx]; }
+function applyTemplate(){ var t=currentTpl(); if(!t)return;
+  if(!selectedKey){ tplMsg='Select a device in the 3D view first, then apply.'; tplMsgWarn=true; renderTemplates(); return; }
+  tplMsgWarn=false;
+  if(selectedKey==='vfd'||selectedKey==='fan'){ farmFans.forEach(function(f,i){ vfdFlash[i]={color:0x43d17a,until:performance.now()+1300}; });
+    if(tplTab==='vfd') commDevices.forEach(function(d){ if(d.kind==='vfd') d.model=t.name; }); }
+  else { genFlash.push({meshes:(partRefs[selectedKey]||[]),color:0x43d17a,until:performance.now()+1300});
+    if(tplTab==='relay'&&selectedKey==='relay') commDevices.forEach(function(d){ if(d.kind==='relay') d.model=t.name; });
+    if(tplTab==='sensor'&&selectedKey==='sensor') commDevices.forEach(function(d){ if(d.kind==='sensor') d.model=t.name; }); }
+  var iName=DATA[selectedKey]?DATA[selectedKey].name:selectedKey;
+  tplMsg='Template Applied: '+t.name+' → '+iName;
+  var iEl=document.getElementById('info'); if(iEl&&iEl.classList.contains('show')){ var note=document.getElementById('tplInfoNote');
+    if(!note){ note=document.createElement('div'); note.id='tplInfoNote'; note.style.cssText='margin-top:8px;font-size:11px;color:#7be0a4'; iEl.appendChild(note); } note.textContent='Template: '+t.name; }
+  renderTemplates(); }
+
+function buildTemplates(){ if(tplBuilt)return; tplBuilt=true;
+  templatesEl.innerHTML='<div class="panelHdr"><h3>Device Templates</h3><button class="panelClose" data-panel="templates">✕</button></div>'+
+    '<div class="tplval">FanOS Pro is designed to support multi-brand air-movement systems by using configurable device templates instead of being locked to one manufacturer.</div>'+
+    '<div id="tptabs">'+Object.keys(TPTABS).map(function(t){return '<div class="tab'+(t===tplTab?' on':'')+'" data-ttab="'+t+'">'+TPTABS[t]+'</div>';}).join('')+'</div>'+
+    '<div id="tpbody"></div>'; }
+function renderTemplates(){ if(!tplBuilt)return;
+  templatesEl.querySelectorAll('#tptabs .tab').forEach(function(el){ el.classList.toggle('on',el.dataset.ttab===tplTab); });
+  var body=templatesEl.querySelector('#tpbody'); var list=TPLSETS[tplTab]; var selIdx=(tplSel.tab===tplTab)?tplSel.idx:-1;
+  var h='';
+  if(selIdx>=0&&tplTab!=='profiles'){ var t=list[selIdx];
+    h+='<div class="applybar"><div class="ab1"><div class="abn">'+t.name+'</div><span class="cmp '+CMPCLASS[t.compat]+'">'+t.compat+'</span></div>'+
+      '<button class="abtn" data-act="applytpl">Apply to Selected Device</button>'+
+      (tplMsg?'<div class="abmsg'+(tplMsgWarn?' warn':'')+'">'+tplMsg+'</div>':'')+'</div>'; }
+  h+=list.map(function(t,i){ return tplCard(t,i,i===selIdx); }).join('');
+  body.innerHTML=h; }
+templatesEl.addEventListener('click',function(e){ var t=e.target.closest?e.target.closest('[data-ttab],[data-tsel],[data-act]'):null; if(!t)return;
+  if(t.dataset.ttab){ tplTab=t.dataset.ttab; tplMsg=''; renderTemplates(); return; }
+  if(t.dataset.act==='applytpl'){ applyTemplate(); return; }
+  if(t.dataset.tsel!==undefined){ var i=+t.dataset.tsel; tplSel={tab:tplTab,idx:(tplSel.tab===tplTab&&tplSel.idx===i)?-1:i}; tplMsg=''; renderTemplates(); return; } });
+templatesBtn.onclick=function(){ templatesOpen=!templatesOpen;
+  if(templatesOpen){ if(typeof demoActive!=='undefined'&&demoActive)demoExit(); closeAllPanels('templates'); buildTemplates(); renderTemplates(); templatesEl.classList.add('show'); templatesBtn.classList.add('on'); }
+  else { templatesEl.classList.remove('show'); templatesBtn.classList.remove('on'); } };
+
+/* ================= Phase 11: Engineering Documentation & Handoff ================= */
+var handoffEl=document.getElementById('handoff'), handoffBtn=document.getElementById('handoffBtn');
+var handoffOpen=false, handoffTab='summary', handoffBuilt=false, hoReportShown=false;
+
+var WIRES=[
+ {ckt:'AC-1',from:'Building panel',to:'Cabinet main breaker',cable:'THHN',size:'14 AWG',color:'Blk / Wht / Grn',sig:'120 VAC 1Ø',notes:'15 A branch'},
+ {ckt:'GND',from:'Ground bus',to:'Cabinet ground bar',cable:'THHN (green)',size:'14 AWG',color:'Green',sig:'Equipment ground',notes:'Per NEC 250.122'},
+ {ckt:'485-A',from:'AAEON ttyS0',to:'Zone A drives',cable:'Belden 3105A',size:'24 AWG STP',color:'Blue / White',sig:'RS-485 Bus A',notes:'120 Ω at each end'},
+ {ckt:'485-B',from:'AAEON ttyS1',to:'Zone B drives + relay + sensor',cable:'Belden 3105A',size:'24 AWG STP',color:'Blue / White',sig:'RS-485 Bus B',notes:'120 Ω at each end'},
+ {ckt:'NET-1',from:'PoE switch',to:'27" / 7" touchscreens',cable:'Cat6',size:'23 AWG',color:'T568B',sig:'Ethernet + PoE',notes:'Screens powered over PoE'},
+ {ckt:'RLY',from:'Relay module',to:'Exhaust / louver starters',cable:'MTW',size:'16 AWG',color:'—',sig:'Dry-contact control',notes:'One pair per channel'},
+ {ckt:'FA',from:'Fire-alarm panel',to:'Cabinet FA input',cable:'FPLR',size:'18 AWG',color:'—',sig:'Dry contact (monitor)',notes:'Monitor-only; NOT life-safety shutdown'},
+ {ckt:'MTR',from:'Each VFD',to:'Its HVLS motor',cable:'VFD / motor cable',size:'per motor FLA',color:'—',sig:'3Ø PWM output',notes:'Shielded; keep clear of comms'} ];
+
+var CLOSE=[
+ {k:'Cabinet installed',s:'pass'},{k:'Grounding verified',s:'pass'},{k:'Power verified',s:'pass'},
+ {k:'RS-485 polarity verified',s:'pass'},{k:'Termination verified',s:'pass'},{k:'Modbus addresses documented',s:'pass'},
+ {k:'VFD parameters documented',s:'review'},{k:'Fire alarm input tested',s:'pass'},{k:'Stop All tested',s:'wait'},
+ {k:'Customer trained',s:'wait'},{k:'As-built complete',s:'review'} ];
+
+var NET=[
+ {n:'AAEON controller',sub:'Host · Modbus master',key:'aaeon'},{n:'Ethernet switch',sub:'Unmanaged',key:'eth'},
+ {n:'PoE switch',sub:'Powers screens',key:'poe'},{n:'27" touchscreen',sub:'Master HMI',key:'screen'},
+ {n:'7" local screen',sub:'Door HMI',key:'screen'},{n:'RS-485 Bus A',sub:'Zone A drives',bus:'A'},
+ {n:'RS-485 Bus B',sub:'Zone B + relay + sensor',bus:'B'},{n:'VFDs',sub:'4 fan drives',key:'vfd'},{n:'Relay module',sub:'8-channel',bus:null,key:'relay'} ];
+
+function sysStatusText(){ if(fireAlarm)return 'Fire interlock active'; return farmFans.some(function(f){return f.fault;})?'Fault present':'Normal'; }
+function devList(){ var rows=[{n:'AAEON UP 7000',ty:'Controller',zone:'—',bus:'Host',addr:'master',model:'UP 7000 Edge',fw:'FanOS 1.4',st:'Online',poll:'—'}];
+  commDevices.forEach(function(d){ var zone=d.kind==='vfd'?farmFans[d.idx].zone:(d.bus==='B'?'B':'—');
+    rows.push({n:d.name,ty:(d.kind==='vfd'?'VFD':d.kind==='relay'?'Relay module':'Sensor gateway'),zone:zone,bus:'Bus '+d.bus,
+      addr:d.cur,model:d.model,fw:d.fw,st:(d.found?(d.status==='addr'?'Addressed':'Online'):'Not scanned'),poll:(d.resp?d.resp+' ms':'—')}); });
+  rows.push({n:'27" Touchscreen',ty:'HMI',zone:'—',bus:'Ethernet',addr:'—',model:'PoE panel',fw:'—',st:'Online',poll:'—'});
+  rows.push({n:'7" Door HMI',ty:'HMI',zone:'—',bus:'Ethernet',addr:'—',model:'PoE panel',fw:'—',st:'Online',poll:'—'});
+  return rows; }
+
+function renderSummary(){ var found=commDevices.filter(function(d){return d.found;}).length;
+  var S=[['Project','FanOS Pro Digital Twin Demo'],['Cabinet size','16 × 20 × 8 in NEMA'],['Controller','AAEON UP 7000 Edge · FanOS Pro 1.4'],
+    ['RS-485 buses','2 (Bus A, Bus B)'],['Devices on bus',found+' discovered'],['VFD fans',''+farmFans.length],
+    ['Relay outputs','8 (4 in use)'],['Touchscreens','2 (27" master, 7" door)'],
+    ['Fire alarm input',fireAlarm?'ACTIVE':'Normal · monitor only'],['System status',sysStatusText()]];
+  return '<div class="hkv">'+S.map(function(r){return '<span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span>';}).join('')+'</div>'; }
+function renderWiring(){ return WIRES.map(function(w){ return '<div class="mcard"><div class="mh"><div class="mn">'+w.ckt+' · '+w.sig+'</div></div>'+
+  '<div class="hkv"><span class="k">From</span><span class="v">'+w.from+'</span><span class="k">To</span><span class="v">'+w.to+'</span>'+
+  '<span class="k">Cable</span><span class="v">'+w.cable+'</span><span class="k">Size</span><span class="v">'+w.size+'</span>'+
+  '<span class="k">Color</span><span class="v">'+w.color+'</span><span class="k">Notes</span><span class="v">'+w.notes+'</span></div></div>'; }).join(''); }
+function renderDevices(){ return devList().map(function(r){ return '<div class="mcard"><div class="mh"><div class="mn">'+r.n+'</div><span class="mst ok">'+r.st+'</span></div>'+
+  '<div class="hkv"><span class="k">Type</span><span class="v">'+r.ty+'</span><span class="k">Zone</span><span class="v">'+r.zone+'</span>'+
+  '<span class="k">Bus</span><span class="v">'+r.bus+'</span><span class="k">Modbus</span><span class="v">'+r.addr+'</span>'+
+  '<span class="k">Model</span><span class="v">'+r.model+'</span><span class="k">Firmware</span><span class="v">'+r.fw+'</span>'+
+  '<span class="k">Last poll</span><span class="v">'+r.poll+'</span></div></div>'; }).join(''); }
+function renderIO(){ var inputs=[['Fire-alarm dry contact',(fireAlarm?'ACTIVE':'Normal'),'mon','Monitor only'],
+    ['Cabinet temperature','~44 °C','inp',''],['Door status',(doorOpen?'Open':'Closed'),'inp',''],['Sensor gateway (Bus B)','Online','inp','']];
+  var outputs=[['Relay output 1 · Exhaust','Available','outp'],['Relay output 2 · Louver','Available','outp'],['Relay output 3 · Spare','Available','outp'],
+    ['Relay output 4 · Spare','Available','outp'],['VFD run command','Per drive','outp'],['VFD speed reference','Per drive','outp'],['Fault reset command','Momentary','outp']];
+  var h='<div class="firebox">The fire-alarm dry contact is <b>software-monitored</b> — FanOS Pro stops commanded fan operation when it opens. The required <b>hardwired life-safety shutdown</b> is separate and wired by the fire-alarm contractor.</div>';
+  h+='<div class="hsec">Inputs</div>'+inputs.map(function(r){ return '<div class="iorow"><div><div class="ion">'+r[0]+'</div>'+(r[3]?'<div class="hnote" style="margin:2px 0 0">'+r[3]+'</div>':'')+'</div><div style="display:flex;gap:8px;align-items:center"><span class="iov">'+r[1]+'</span><span class="iotag '+r[2]+'">'+(r[2]==='mon'?'MONITOR':'INPUT')+'</span></div></div>'; }).join('');
+  h+='<div class="hsec">Outputs</div>'+outputs.map(function(r){ return '<div class="iorow"><div class="ion">'+r[0]+'</div><div style="display:flex;gap:8px;align-items:center"><span class="iov">'+r[1]+'</span><span class="iotag outp">OUTPUT</span></div></div>'; }).join('');
+  return h; }
+function renderNetwork(){ return '<div class="svempty" style="margin-bottom:2px">Tap an item to highlight it in 3D.</div>'+NET.map(function(n,i){ return '<div class="svrow" data-net="'+i+'"><div class="rt"><div class="rd">'+n.n+'</div><div class="rts">'+n.sub+'</div></div></div>'; }).join(''); }
+function renderFire(){ return '<div class="firebox">FanOS Pro monitors a fire-alarm dry contact and stops commanded fan operation in software. This does not replace the required hardwired fire-alarm shutdown or code-required interlock wiring by the fire-alarm contractor.</div>'+
+  '<div class="hkv"><span class="k">Input status</span><span class="v">'+(fireAlarm?'ACTIVE':'Normal')+'</span><span class="k">Type</span><span class="v">Dry contact · monitor</span>'+
+  '<span class="k">Last test</span><span class="v">3 d ago · pass</span><span class="k">Verification</span><span class="v">Documented</span></div>'+
+  '<div class="hnote">Notes: confirm fire-alarm contractor interlock is independent of FanOS Pro.</div>'; }
+function renderCloseout(){ var lbl={pass:'PASS',wait:'WAITING',review:'NEEDS REVIEW'},cl={pass:'pass',wait:'wait',review:'warn'};
+  return CLOSE.map(function(c){ return '<div class="vrow"><span class="k">'+c.k+'</span><span class="vstat '+cl[c.s]+'">'+lbl[c.s]+'</span></div>'; }).join(''); }
+function handoffReport(){ var d=new Date(),L=[];
+  L.push('FanOS Pro — System Handoff Summary'); L.push('Generated: '+d.toLocaleString()); L.push('');
+  L.push('PROJECT: FanOS Pro Digital Twin Demo'); L.push('Cabinet: 16 x 20 x 8 in NEMA enclosure');
+  L.push('Controller: AAEON UP 7000 Edge - FanOS Pro 1.4'); L.push('RS-485 buses: 2 (Bus A, Bus B)');
+  L.push('VFD fans: '+farmFans.length); L.push('Relay outputs: 8 (4 in use)'); L.push('Touchscreens: 2 (27" master, 7" door)');
+  L.push('Fire alarm input: '+(fireAlarm?'ACTIVE':'Normal - monitor only')); L.push('System status: '+sysStatusText()); L.push('');
+  L.push('DEVICES:'); devList().forEach(function(r){ L.push('  '+r.n+' | '+r.ty+' | '+r.bus+' | addr '+r.addr+' | '+r.model+' | fw '+r.fw+' | '+r.st); }); L.push('');
+  L.push('WIRING SCHEDULE:'); WIRES.forEach(function(w){ L.push('  '+w.ckt+': '+w.from+' -> '+w.to+' | '+w.cable+' '+w.size+' | '+w.sig+(w.notes?' ('+w.notes+')':'')); }); L.push('');
+  L.push('CLOSEOUT:'); CLOSE.forEach(function(c){ L.push('  ['+(c.s==='pass'?'PASS':c.s==='wait'?'WAIT':'REVIEW')+'] '+c.k); }); L.push('');
+  L.push('FIRE ALARM: Software monitor-only interlock. Does NOT replace the hardwired life-safety shutdown / code-required interlock by the fire-alarm contractor.');
+  return L.join('\n'); }
+
+var HTABS={summary:'System Summary',wiring:'Wiring Schedule',devices:'Device List',io:'I/O Map',network:'Network Map',fire:'Fire Alarm',closeout:'Closeout'};
+function buildHandoff(){ if(handoffBuilt)return; handoffBuilt=true;
+  handoffEl.innerHTML='<div class="panelHdr"><h3>Engineering Handoff</h3><button class="panelClose" data-panel="handoff">✕</button></div>'+
+    '<div id="hotabs">'+Object.keys(HTABS).map(function(t){return '<div class="tab'+(t===handoffTab?' on':'')+'" data-htab="'+t+'">'+HTABS[t]+'</div>';}).join('')+'</div>'+
+    '<div id="hobody"></div>'+
+    '<button class="cbtn" data-act="copyho" style="margin-top:12px">Copy Handoff Summary</button>'+
+    '<div class="hcopied" id="hoCopied">Copied to clipboard ✓</div><textarea id="hoReport" readonly></textarea>'; }
+function renderHandoff(){ if(!handoffBuilt)return;
+  handoffEl.querySelectorAll('#hotabs .tab').forEach(function(el){ el.classList.toggle('on',el.dataset.htab===handoffTab); });
+  var b=handoffEl.querySelector('#hobody');
+  b.innerHTML = handoffTab==='summary'?renderSummary(): handoffTab==='wiring'?renderWiring(): handoffTab==='devices'?renderDevices():
+    handoffTab==='io'?renderIO(): handoffTab==='network'?renderNetwork(): handoffTab==='fire'?renderFire(): renderCloseout(); }
+handoffEl.addEventListener('click',function(e){ var t=e.target.closest?e.target.closest('[data-htab],[data-net],[data-act]'):null; if(!t)return;
+  if(t.dataset.htab){ handoffTab=t.dataset.htab; renderHandoff(); return; }
+  if(t.dataset.act==='copyho'){ var ta=document.getElementById('hoReport'), cp=document.getElementById('hoCopied'); var txt=handoffReport();
+    ta.value=txt; ta.classList.add('show'); ta.focus(); ta.select();
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ if(cp)cp.classList.add('show'); }).catch(function(){}); } else { document.execCommand&&document.execCommand('copy'); if(cp)cp.classList.add('show'); } }catch(err){}
+    return; }
+  if(t.dataset.net!==undefined){ var n=NET[+t.dataset.net]; if(!n)return;
+    if(n.key){ selectPart(n.key); } if(n.bus){ tracePulse(busPath[n.bus],0x35a7ff); gotoPreset({t:[-1,-2,-10],r:72,th:0.75,ph:1.2}); }
+    return; } });
+handoffBtn.onclick=function(){ handoffOpen=!handoffOpen;
+  if(handoffOpen){ if(typeof demoActive!=='undefined'&&demoActive)demoExit(); closeAllPanels('handoff'); buildHandoff(); renderHandoff(); handoffEl.classList.add('show'); handoffBtn.classList.add('on'); }
+  else { handoffEl.classList.remove('show'); handoffBtn.classList.remove('on'); } };
 
 /* ================= Phase 10: Customer Demo Mode ================= */
 var demoEl=document.getElementById('demo'), demoBtn=document.getElementById('demoBtn');
